@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>메모 💜</title>
+<title>밍💜</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#B39DDB">
 <meta name="color-scheme" content="light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="메모">
+<meta name="apple-mobile-web-app-title" content="밍💜">
 <meta name="format-detection" content="telephone=no">
 <meta name="app-version" content="1.1.0">
 <link rel="manifest" href="manifest.webmanifest">
@@ -380,7 +380,7 @@ body.locked{overflow:hidden}
   <section class="view on" id="view-list">
     <header class="topbar">
       <div class="topbar-inner">
-        <h1><span class="brand-mark">💜</span>메모</h1>
+        <h1>밍<span class="brand-mark">💜</span></h1>
         <div class="tb-actions">
           <button class="txt-btn" id="editBtn" data-act="toggleEdit">편집</button>
           <button class="icon-btn" data-act="addCategory" aria-label="카테고리 추가">
@@ -481,7 +481,7 @@ body.locked{overflow:hidden}
 <div id="lock" aria-hidden="true" hidden>
   <div class="lock-inner">
     <div class="lock-badge">🔒</div>
-    <div class="lock-title">메모 잠금</div>
+    <div class="lock-title">밍💜 잠금</div>
     <div class="lock-sub" id="lockSub">비밀번호 4자리를 입력해 줘</div>
     <div class="lock-dots" id="lockDots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="lock-pad" id="lockPad">
@@ -1312,7 +1312,7 @@ function settingsSheet(){
   var nMemo = state.messages.filter(function(m){ return m.type === 'memo'; }).length;
   var nTodo = state.messages.filter(function(m){ return m.type === 'todo'; }).length;
   openSheet(
-    '<div class="sh-title">메모 💜</div>' +
+    '<div class="sh-title">밍💜</div>' +
     '<div class="sh-desc">방 ' + state.categories.length + ' · 메모 ' + nMemo + ' · 할 일 ' + nTodo + ' · 디데이 ' + state.ddays.length + '<br>모든 내용은 이 기기 브라우저에만 저장돼.</div>' +
     '<div class="menu-list">' +
       '<button class="menu-item" data-act="openLockSettings"><span class="mi">🔒</span><div>암호 잠금 설정<small>4자리 PIN · 지문으로 열기</small></div>' + (lockOn() ? '<span class="badge-on">켜짐</span>' : '') + '</button>' +
@@ -1604,7 +1604,7 @@ function registerBioCredential(){
       var userId = new Uint8Array(16); crypto.getRandomValues(userId);
       var pk = {
         challenge: challenge,
-        rp: {name:'메모 💜'},
+        rp: {name:'밍💜'},
         user: {id: userId, name: 'memo-lock', displayName: '메모 잠금'},
         pubKeyCredParams: [{type:'public-key', alg:-7}, {type:'public-key', alg:-257}],
         authenticatorSelection: {authenticatorAttachment:'platform', requireResidentKey:false, residentKey:'discouraged', userVerification:'required'},
@@ -1696,7 +1696,7 @@ function renderLockSheet(){
         '<button class="lockrow danger" type="button" data-act="lockTurnOff"><span class="lr-ico">🔓</span><span class="lr-t">잠금 끄기<small>지금 쓰는 비밀번호를 넣으면 꺼져</small></span></button>'
       : '') +
     '<div class="sh-note">비밀번호를 잊으면 앱을 열 수 없어. 중요한 메모는 가끔 백업해 둬.<br>지문은 이 기기 브라우저에만 등록되고 서버로 보내지 않아.</div>' +
-    '<div class="sh-version">메모 1.2.0 · 디데이 1일부터 세기</div>' +
+    '<div class="sh-version">밍💜 1.2.0 · 디데이 1일부터 세기</div>' +
     '<div class="sheet-actions"><button class="btn ghost" data-act="closeSheet">닫기</button></div>'
   );
 }
