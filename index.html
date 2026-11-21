@@ -562,6 +562,7 @@ var editMode = false;
 var draftEmoji = '💬';
 var draftCat = '';
 var pendingPin = false;
+var pendingOne = false;
 var undoTimer = null;
 
 function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
@@ -615,6 +616,7 @@ function normalize(raw){
         id: String(x.id || uid('d_')),
         title: String(x.title).slice(0,60),
         date: date,
+        countFromOne: !!x.countFromOne,
         createdAt: Number(x.createdAt) || Date.now()
       });
     });
@@ -684,16 +686,17 @@ function dayDiff(dateStr){
   var today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
   return Math.round((target - today) / 86400000);
 }
-function ddayLabel(dateStr){
+function ddayLabel(dateStr, fromOne){
   var diff = dayDiff(dateStr);
-  if(diff === 0) return 'D-Day';
-  return diff > 0 ? 'D-' + diff : 'D+' + (-diff);
+  if(diff > 0) return 'D-' + diff;
+  if(fromOne) return 'D+' + (-diff + 1);
+  return diff === 0 ? 'D-Day' : 'D+' + (-diff);
 }
-function ddaySub(dateStr){
+function ddaySub(dateStr, fromOne){
   var diff = dayDiff(dateStr);
-  if(diff === 0) return '바로 오늘!';
   if(diff > 0) return diff + '일 남았어';
-  return (-diff) + '일 지났어';
+  if(fromOne) return diff === 0 ? '오늘부터 1일째!' : (-diff + 1) + '일째';
+  return diff === 0 ? '바로 오늘!' : (-diff) + '일 지났어';
 }
 
 /* ══════════════ 공통 UI ══════════════ */
@@ -790,7 +793,7 @@ function renderList(){
   var pin = state.ddays.filter(function(d){ return d.id === state.pinId; })[0];
   if(pin){
     html += '<div class="pin-wrap"><button class="pinbanner" data-act="goPinned">' +
-      '<span class="pb-label">' + esc(ddayLabel(pin.date)) + '</span>' +
+      '<span class="pb-label">' + esc(ddayLabel(pin.date, pin.countFromOne)) + '</span>' +
       '<span class="pb-main"><span class="pb-tag">대표 디데이</span>' +
         '<span class="pb-title">' + esc(pin.title) + '</span>' +
         '<span class="pb-date">' + esc(fmtFullDate(pin.date)) + '</span>' +
@@ -1237,10 +1240,10 @@ function renderDday(){
     sorted.forEach(function(d, i){
       var diff = dayDiff(d.date);
       var pinned = state.pinId === d.id;
-      var label = ddayLabel(d.date);
+      var label = ddayLabel(d.date, d.countFromOne);
       html += '<div class="dcard ' + (diff < 0 ? 'past' : '') + ' ' + (pinned ? 'pinned' : '') + '" data-act="editDday" data-id="' + d.id + '" style="--accent:' + PALETTE[i % PALETTE.length] + '">' +
         (pinned ? '' : '') +
-        '<div class="dnum">' + esc(label) + '<small>' + esc(ddaySub(d.date)) + '</small></div>' +
+        '<div class="dnum">' + esc(label) + '<small>' + esc(ddaySub(d.date, d.countFromOne)) + '</small></div>' +
         '<div class="dinfo">' + (pinned ? '<span class="pin-tag">대표 디데이</span>' : '') + '<div class="dtitle">' + esc(d.title) + '</div>' +
           '<div class="ddate">' + esc(fmtFullDate(d.date)) + '</div></div>' +
         '<button class="dpin ' + (pinned ? 'on' : '') + '" data-act="pinDday" data-id="' + d.id + '" aria-label="대표 디데이">' + (pinned ? ICON.starOn : ICON.star) + '</button>' +
@@ -1254,6 +1257,7 @@ function ddaySheet(d){
   var isNew = !d;
   var date = d ? d.date : isoDate(7);
   pendingPin = d ? state.pinId === d.id : false;
+  pendingOne = d ? !!d.countFromOne : false;
   var body = '<div class="sh-title">' + (isNew ? '디데이 추가' : '디데이 수정') + '</div>';
   body += '<div class="sh-desc">날짜를 넣으면 D-7 / D-Day / D+3로 자동 계산해 💜</div>';
   body += '<label class="fld"><span>제목</span><input type="text" id="ddayTitle" maxlength="40" placeholder="예: 서울식물원 야간개장" value="' + (d ? esc(d.title) : '') + '"></label>';
@@ -1261,6 +1265,9 @@ function ddaySheet(d){
   body += '<button class="switch-row" data-act="togglePin" style="width:100%;text-align:left">' +
     '<span class="st">대표 디데이로 고정<small>채팅 목록 맨 위에 배너로 보여</small></span>' +
     '<span class="switch ' + (pendingPin ? 'on' : '') + '" id="pinSwitch"></span></button>';
+  body += '<button class="switch-row" data-act="toggleOne" style="width:100%;text-align:left;margin-top:8px">' +
+    '<span class="st">1일부터 세기 (당일 포함)<small>기념일처럼 시작일도 1일째로 세어 줘</small></span>' +
+    '<span class="switch ' + (pendingOne ? 'on' : '') + '" id="oneSwitch"></span></button>';
   body += '<div class="sheet-actions">' +
     (isNew ? '' : '<button class="btn danger" data-act="delDday" data-id="' + d.id + '">삭제</button>') +
     '<button class="btn primary" data-act="saveDday" data-id="' + (isNew ? '' : d.id) + '">' + (isNew ? '추가하기' : '저장') + '</button></div>';
@@ -1274,11 +1281,11 @@ function saveDday(id){
   if(!date){ toast('날짜를 골라 줘'); return; }
   if(id){
     var d = state.ddays.filter(function(x){ return x.id === id; })[0];
-    if(d){ d.title = title.slice(0,40); d.date = date; }
+    if(d){ d.title = title.slice(0,40); d.date = date; d.countFromOne = !!pendingOne; }
     if(pendingPin) state.pinId = id;
     else if(state.pinId === id) state.pinId = null;
   }else{
-    var nd = {id: uid('d_'), title: title.slice(0,40), date: date, createdAt: Date.now()};
+    var nd = {id: uid('d_'), title: title.slice(0,40), date: date, countFromOne: !!pendingOne, createdAt: Date.now()};
     state.ddays.push(nd);
     if(pendingPin) state.pinId = nd.id;
   }
@@ -1379,7 +1386,7 @@ function guideSheet(){
       '<p style="margin-bottom:10px"><b style="color:var(--ink)">1. 방 만들기</b><br>채팅 탭 오른쪽 위 <b>＋</b>로 카테고리를 추가해. 이름과 아이콘은 언제든 바꿀 수 있어.</p>' +
       '<p style="margin-bottom:10px"><b style="color:var(--ink)">2. 메모 남기기</b><br>방에 들어가 아래 입력창에 쓰고 보내면 시간이랑 같이 말풍선으로 쌓여. 말풍선을 <b>길게 누르면</b> 수정·삭제할 수 있어.</p>' +
       '<p style="margin-bottom:10px"><b style="color:var(--ink)">3. 할 일 체크</b><br>입력창 위 <b>✅ 할 일</b>로 바꿔 보내면 체크박스 말풍선이 돼. 톡 누르면 취소선 그어지며 완료!</p>' +
-      '<p style="margin-bottom:10px"><b style="color:var(--ink)">4. 한눈에 보기</b><br>체크리스트 탭에서 모든 방의 할 일을 모아 보고, 디데이 탭에서 중요한 날을 D-7 / D-Day로 세.</p>' +
+      '<p style="margin-bottom:10px"><b style="color:var(--ink)">4. 한눈에 보기</b><br>체크리스트 탭에서 모든 방의 할 일을 모아 보고, 디데이 탭에서 중요한 날을 D-7 / D-Day로 세. 기념일은 디데이 수정에서 <b>1일부터 세기</b>를 켜면 시작한 날부터 1일째로 세.</p>' +
       '<p><b style="color:var(--ink)">5. 홈 화면에 추가</b><br>삼성 인터넷 메뉴 → <b>홈 화면에 추가</b>를 누르면 앱처럼 열려.</p>' +
     '</div>' +
     '<div style="margin-top:14px;font-size:11.5px;color:var(--ink3)">기록은 이 브라우저에만 저장돼. 브라우저 기록을 지우면 함께 사라지니 가끔 백업해 둬.</div>' +
@@ -1689,7 +1696,7 @@ function renderLockSheet(){
         '<button class="lockrow danger" type="button" data-act="lockTurnOff"><span class="lr-ico">🔓</span><span class="lr-t">잠금 끄기<small>지금 쓰는 비밀번호를 넣으면 꺼져</small></span></button>'
       : '') +
     '<div class="sh-note">비밀번호를 잊으면 앱을 열 수 없어. 중요한 메모는 가끔 백업해 둬.<br>지문은 이 기기 브라우저에만 등록되고 서버로 보내지 않아.</div>' +
-    '<div class="sh-version">메모 1.1.0 · 잠금 기능</div>' +
+    '<div class="sh-version">메모 1.2.0 · 디데이 1일부터 세기</div>' +
     '<div class="sheet-actions"><button class="btn ghost" data-act="closeSheet">닫기</button></div>'
   );
 }
@@ -1968,6 +1975,12 @@ document.addEventListener('click', function(e){
       pendingPin = !pendingPin;
       var sw = document.getElementById('pinSwitch');
       if(sw) sw.classList.toggle('on', pendingPin);
+      return;
+    }
+    case 'toggleOne': {
+      pendingOne = !pendingOne;
+      var sw1 = document.getElementById('oneSwitch');
+      if(sw1) sw1.classList.toggle('on', pendingOne);
       return;
     }
     case 'saveDday': saveDday(id); return;
