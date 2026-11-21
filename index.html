@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="메모">
 <meta name="format-detection" content="telephone=no">
+<meta name="app-version" content="1.1.0">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -288,6 +289,64 @@ svg{display:block}
 .switch.on{background:var(--lav)}
 .switch.on::after{transform:translateX(19px)}
 
+/* ── 잠금 (PIN 4자리 · 지문) ─────────────── */
+html.lock-pending #app,html.lock-pending .tabbar,html.lock-pending .fab{visibility:hidden}
+html.lock-pending{background:#EFE7FC}
+#lock{position:fixed;inset:0;z-index:120;display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(26px + var(--sat)) 22px calc(22px + var(--sab));overflow-y:auto;
+  background:radial-gradient(120% 80% at 50% 0%,#FCFAFF 0%,#F1EAFD 42%,#E4D6F9 100%)}
+#lock.on{display:flex}
+html.lock-pending #lock{display:flex}
+#lock::before{content:"";position:absolute;width:290px;height:290px;border-radius:50%;background:radial-gradient(circle,rgba(179,157,219,.34),transparent 70%);top:-130px;right:-100px;pointer-events:none}
+#lock::after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(179,157,219,.2),transparent 70%);bottom:-110px;left:-90px;pointer-events:none}
+.lock-inner{position:relative;z-index:1;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center}
+.lock-badge{width:60px;height:60px;border-radius:21px;display:grid;place-items:center;font-size:28px;
+  background:linear-gradient(140deg,#B79CE8,#7E57C2);box-shadow:0 14px 28px -12px rgba(126,87,194,.85);margin-bottom:15px}
+.lock-title{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.lock-sub{margin-top:6px;font-size:12.5px;color:var(--ink2);text-align:center;min-height:18px;line-height:1.5;transition:color .15s}
+.lock-sub.err{color:var(--danger);font-weight:700}
+.lock-dots{display:flex;gap:16px;margin:20px 0 2px}
+.lock-dots i{width:15px;height:15px;border-radius:50%;border:1.7px solid #B098D9;background:rgba(255,255,255,.92);transition:transform .12s,background .12s,border-color .12s}
+.lock-dots i.on{background:var(--lav-deep);border-color:var(--lav-deep);transform:scale(1.1)}
+@keyframes lockShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-10px)}35%{transform:translateX(9px)}55%{transform:translateX(-6px)}75%{transform:translateX(4px)}}
+.lock-dots.shake{animation:lockShake .44s}
+.lock-pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px;margin-top:24px;justify-content:center}
+.lk{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.93);display:grid;place-items:center;
+  font-size:25px;font-weight:700;color:#3B3153;letter-spacing:-.5px;
+  box-shadow:0 6px 16px -10px rgba(90,60,150,.55),inset 0 0 0 1px rgba(255,255,255,.9);transition:transform .1s,background .12s}
+.lk:active{transform:scale(.94);background:#fff}
+.lk.blank{background:none;box-shadow:none;pointer-events:none}
+.lk.del{background:none;box-shadow:none;color:var(--lav-deep);font-size:23px}
+.lock-bio{margin-top:20px;height:46px;padding:0 20px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.92);color:var(--lav-deep);font-size:13.5px;font-weight:800;
+  box-shadow:0 8px 20px -12px rgba(126,87,194,.95)}
+.lock-bio[hidden]{display:none}
+.lock-bio.busy{opacity:.55}
+.lock-foot{position:absolute;bottom:calc(14px + var(--sab));left:0;right:0;text-align:center;font-size:11px;color:#A396BC}
+body.locked{overflow:hidden}
+@media (max-height:700px){
+  .lock-badge{width:52px;height:52px;font-size:24px;border-radius:18px;margin-bottom:10px}
+  .lock-dots{margin:14px 0 0}
+  .lock-pad{grid-template-columns:repeat(3,62px);gap:9px;margin-top:16px}
+  .lk{width:62px;height:62px;font-size:22px}
+}
+/* 시트 안 PIN 입력 */
+.pinfield{width:100%;text-align:center;font-size:27px;font-weight:800;letter-spacing:12px;text-indent:12px;
+  padding:13px 0;border-radius:16px;border:1.5px solid #EDE6F9;background:#FBFAFE;color:var(--lav-deep);outline:none}
+.pinfield:focus{border-color:var(--lav-mid);background:#fff}
+.pinfield::placeholder{color:#D5CAE9;letter-spacing:12px}
+.sh-note{margin:2px 2px 6px;font-size:11.5px;line-height:1.6;color:var(--ink3)}
+.sh-version{margin:12px 2px 0;font-size:11px;color:#BCB2CE;letter-spacing:.2px}
+.lockrow{display:flex;align-items:center;gap:11px;padding:13px 12px;border-radius:15px;background:#FBFAFE;
+  border:1.5px solid #F0EAFB;width:100%;text-align:left;margin-bottom:8px;transition:background .14s}
+.lockrow:active{background:var(--lav-bg2)}
+.lockrow .lr-ico{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:16px;background:#F2ECFD;flex:0 0 auto}
+.lockrow .lr-t{flex:1;min-width:0;font-size:14px;font-weight:700}
+.lockrow .lr-t small{display:block;font-size:11.5px;color:var(--ink3);font-weight:500;margin-top:2px;line-height:1.45}
+.lockrow[disabled]{opacity:.55}
+.lockrow.danger .lr-t{color:var(--danger)}
+.badge-on{font-size:10.5px;font-weight:800;color:#6B4BAF;background:#EDE3FE;border-radius:999px;padding:3px 9px;flex:0 0 auto}
+
 /* ── toast ─────────────────────────────── */
 #toast{position:fixed;left:50%;bottom:calc(88px + var(--sab));transform:translate(-50%,20px);z-index:80;
   background:rgba(43,32,64,.94);color:#fff;border-radius:14px;padding:12px 16px;font-size:13px;font-weight:600;word-break:keep-all;
@@ -304,6 +363,15 @@ svg{display:block}
   .fab{right:calc(50% - 260px + 16px)}
 }
 </style>
+/* 잠금이 켜져 있으면 첫 화면부터 내용을 가려 둔다 (앱 내용이 잠깐 비치지 않도록) */
+<script>
+(function(){
+  try{
+    var c = JSON.parse(localStorage.getItem('ming.memo.lock.v1') || 'null');
+    if(c && c.enabled && c.hash && c.salt) document.documentElement.classList.add('lock-pending');
+  }catch(e){}
+})();
+</script>
 </head>
 <body>
 <div id="app">
@@ -407,6 +475,35 @@ svg{display:block}
     </button>
   </section>
 
+</div>
+
+<!-- ═══ 잠금 화면 (PIN · 지문) ═══ -->
+<div id="lock" aria-hidden="true" hidden>
+  <div class="lock-inner">
+    <div class="lock-badge">🔒</div>
+    <div class="lock-title">메모 잠금</div>
+    <div class="lock-sub" id="lockSub">비밀번호 4자리를 입력해 줘</div>
+    <div class="lock-dots" id="lockDots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="lock-pad" id="lockPad">
+      <button class="lk" type="button" data-lk="1" aria-label="1">1</button>
+      <button class="lk" type="button" data-lk="2" aria-label="2">2</button>
+      <button class="lk" type="button" data-lk="3" aria-label="3">3</button>
+      <button class="lk" type="button" data-lk="4" aria-label="4">4</button>
+      <button class="lk" type="button" data-lk="5" aria-label="5">5</button>
+      <button class="lk" type="button" data-lk="6" aria-label="6">6</button>
+      <button class="lk" type="button" data-lk="7" aria-label="7">7</button>
+      <button class="lk" type="button" data-lk="8" aria-label="8">8</button>
+      <button class="lk" type="button" data-lk="9" aria-label="9">9</button>
+      <span class="lk blank"></span>
+      <button class="lk" type="button" data-lk="0" aria-label="0">0</button>
+      <button class="lk del" type="button" data-lk="del" aria-label="지우기">⌫</button>
+    </div>
+    <button class="lock-bio" id="lockBio" type="button" data-lk="bio" hidden>
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5A7.5 7.5 0 0 0 4.5 12v1.2"/><path d="M12 4.5A7.5 7.5 0 0 1 19.5 12v1"/><path d="M8 12a4 4 0 0 1 8 0v2.2a9 9 0 0 0 .6 3"/><path d="M12 12v3.4a10 10 0 0 0 .5 3.1"/><path d="M8 12v3a9 9 0 0 0 .7 3.6"/><path d="M5 16.6a11 11 0 0 1-.5-3.3"/></svg>
+      지문으로 열기
+    </button>
+  </div>
+  <div class="lock-foot">💜 이 기기에만 저장된 메모야</div>
 </div>
 
 <nav class="tabbar" id="tabbar">
@@ -614,7 +711,12 @@ var ICON = {
   arrow: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>'
 };
 
-function vibrate(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+function vibrate(ms){
+  try{
+    if(navigator.userActivation && navigator.userActivation.hasBeenActive === false) return;
+    if(navigator.vibrate) navigator.vibrate(ms);
+  }catch(e){}
+}
 
 var toastTimer = null;
 function toast(msg, actionLabel, onAction, ms){
@@ -1206,6 +1308,7 @@ function settingsSheet(){
     '<div class="sh-title">메모 💜</div>' +
     '<div class="sh-desc">방 ' + state.categories.length + ' · 메모 ' + nMemo + ' · 할 일 ' + nTodo + ' · 디데이 ' + state.ddays.length + '<br>모든 내용은 이 기기 브라우저에만 저장돼.</div>' +
     '<div class="menu-list">' +
+      '<button class="menu-item" data-act="openLockSettings"><span class="mi">🔒</span><div>암호 잠금 설정<small>4자리 PIN · 지문으로 열기</small></div>' + (lockOn() ? '<span class="badge-on">켜짐</span>' : '') + '</button>' +
       '<button class="menu-item" data-act="exportData"><span class="mi">⬇️</span><div>백업 파일로 내보내기<small>JSON 파일로 저장해 둘게</small></div></button>' +
       '<button class="menu-item" data-act="importData"><span class="mi">⬆️</span><div>백업 파일 불러오기<small>지금 내용은 백업 내용으로 바뀌어</small></div></button>' +
       '<button class="menu-item" data-act="openGuide"><span class="mi">💡</span><div>사용 방법</div></button>' +
@@ -1282,6 +1385,492 @@ function guideSheet(){
     '<div style="margin-top:14px;font-size:11.5px;color:var(--ink3)">기록은 이 브라우저에만 저장돼. 브라우저 기록을 지우면 함께 사라지니 가끔 백업해 둬.</div>' +
     '<div class="sheet-actions"><button class="btn primary" data-act="closeSheet">알겠어</button></div>'
   );
+}
+
+/* ══════════════ 잠금 (PIN 4자리 · 지문) ══════════════ */
+/* 메모 데이터(ming.memo.v1)는 건드리지 않고, 잠금 설정만 ming.memo.lock.v1에 따로 둔다. */
+var LOCK_KEY = 'ming.memo.lock.v1';
+var lockCfg = null;
+var locked = false;
+var pinBuf = '';
+var lockBusy = false;
+var bioBusy = false;
+var bioOK = null;          // null = 확인 중, true/false = 지원 여부
+var bioTimer = null;
+var bioToken = 0;          // 지문 요청이 PIN 입력으로 바뀌면 늦게 온 결과를 버린다
+var suppressUntil = 0;     // 지문 팝업으로 생기는 visibilitychange 무시 구간
+var hiddenAt = 0;
+var pinSheetCb = null;
+var lockEl = document.getElementById('lock');
+var rootEl = document.documentElement;
+
+function cryptoOK(){
+  try{ return !!(window.crypto && window.crypto.subtle && window.crypto.subtle.digest && window.crypto.getRandomValues && window.isSecureContext !== false); }
+  catch(e){ return false; }
+}
+function loadLock(){
+  try{
+    var raw = localStorage.getItem(LOCK_KEY);
+    lockCfg = raw ? JSON.parse(raw) : null;
+    if(!lockCfg || typeof lockCfg !== 'object') lockCfg = null;
+  }catch(e){ lockCfg = null; }
+  if(!lockCfg) lockCfg = {v:1, enabled:false, salt:'', hash:'', bio:false, credId:'', createdAt:0, updatedAt:0};
+  lockCfg.bio = !!lockCfg.bio;
+  lockCfg.credId = String(lockCfg.credId || '');
+}
+function saveLock(){
+  lockCfg.updatedAt = Date.now();
+  try{ localStorage.setItem(LOCK_KEY, JSON.stringify(lockCfg)); }
+  catch(e){ toast('잠금 설정을 저장하지 못했어 😢'); }
+}
+function lockOn(){ return !!(lockCfg && lockCfg.enabled && lockCfg.hash && lockCfg.salt); }
+
+/* PIN은 salt와 함께 SHA-256 해시로만 저장한다 */
+function toHex(buf){
+  var b = new Uint8Array(buf), s = '';
+  for(var i = 0; i < b.length; i++) s += ('0' + b[i].toString(16)).slice(-2);
+  return s;
+}
+function randHex(n){
+  var a = new Uint8Array(n);
+  crypto.getRandomValues(a);
+  return toHex(a.buffer);
+}
+function sha256(text){
+  var data = new TextEncoder().encode(text);
+  return crypto.subtle.digest('SHA-256', data).then(toHex);
+}
+function hashPin(pin){ return sha256(String(lockCfg.salt) + ':' + String(pin)); }
+function verifyPin(pin){
+  if(!lockOn()) return Promise.resolve(false);
+  return hashPin(pin).then(function(h){ return h === lockCfg.hash; }).catch(function(){ return false; });
+}
+function setPin(pin){
+  var salt = randHex(16);
+  return sha256(salt + ':' + pin).then(function(h){
+    if(!lockCfg) loadLock();
+    lockCfg.enabled = true;
+    lockCfg.salt = salt;
+    lockCfg.hash = h;
+    saveLock();
+  });
+}
+
+/* ── 잠금 화면 ── */
+function renderDots(){
+  var dots = document.getElementById('lockDots').children;
+  for(var i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i < pinBuf.length);
+}
+function setLockSub(msg, isErr){
+  var el = document.getElementById('lockSub');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.toggle('err', !!isErr);
+}
+function shakeDots(){
+  var d = document.getElementById('lockDots');
+  d.classList.remove('shake');
+  void d.offsetWidth;
+  d.classList.add('shake');
+}
+function updateBioButton(){
+  var btn = document.getElementById('lockBio');
+  if(!btn) return;
+  btn.hidden = !(lockOn() && lockCfg.bio && lockCfg.credId && bioOK !== false);
+  btn.classList.remove('busy');
+}
+function showLock(opts){
+  opts = opts || {};
+  if(locked) return;
+  locked = true;
+  rootEl.classList.remove('lock-pending');
+  lockEl.hidden = false;
+  lockEl.setAttribute('aria-hidden', 'false');
+  lockEl.classList.add('on');
+  document.body.classList.add('locked');
+  pinBuf = '';
+  renderDots();
+  setLockSub('비밀번호 4자리를 입력해 줘', false);
+  updateBioButton();
+  if(sheet.classList.contains('on')) closeSheet();
+  clearTimeout(bioTimer);
+  if(lockCfg.bio && lockCfg.credId && !opts.noBio){
+    bioTimer = setTimeout(function(){ bioUnlock(true); }, 450);
+  }
+}
+function hideLock(){
+  if(!locked) return;
+  locked = false;
+  clearTimeout(bioTimer);
+  pinBuf = '';
+  renderDots();
+  lockEl.classList.remove('on');
+  document.body.classList.remove('locked');
+  suppressUntil = Date.now() + 1500;
+  setTimeout(function(){
+    if(!locked){
+      lockEl.hidden = true;
+      lockEl.setAttribute('aria-hidden', 'true');
+    }
+  }, 240);
+}
+function onLockKey(k){
+  if(!locked) return;
+  if(k === 'bio'){ bioUnlock(false); return; }
+  if(k === 'del'){ pinBuf = pinBuf.slice(0, -1); renderDots(); return; }
+  if(!/^[0-9]$/.test(String(k))) return;
+  if(lockBusy || pinBuf.length >= 4) return;
+  // 지문 팝업이 떠 있어도 바로 비밀번호로 넘어갈 수 있게 한다
+  bioToken++;
+  bioBusy = false;
+  var bioBtn = document.getElementById('lockBio');
+  if(bioBtn) bioBtn.classList.remove('busy');
+  pinBuf += String(k);
+  renderDots();
+  setLockSub('비밀번호 4자리를 입력해 줘', false);
+  vibrate(6);
+  if(pinBuf.length === 4) checkPin();
+}
+function checkPin(){
+  if(lockBusy || !lockOn()) return;
+  lockBusy = true;
+  hashPin(pinBuf).then(function(h){
+    lockBusy = false;
+    if(h === lockCfg.hash){ vibrate(10); hideLock(); }
+    else wrongLock();
+  }).catch(function(){ lockBusy = false; wrongLock(); });
+}
+function wrongLock(){
+  shakeDots();
+  setLockSub('비밀번호가 맞지 않아', true);
+  vibrate(180);
+  setTimeout(function(){ pinBuf = ''; renderDots(); }, 380);
+}
+
+/* ── 지문 (WebAuthn platform authenticator) ── */
+function bioSupported(){
+  try{ return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create && navigator.credentials.get); }
+  catch(e){ return false; }
+}
+function checkBio(){
+  if(!bioSupported()){ bioOK = false; updateBioButton(); return Promise.resolve(false); }
+  var p;
+  try{
+    p = PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
+      ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      : Promise.resolve(false);
+  }catch(e){ p = Promise.resolve(false); }
+  return p.then(function(v){ bioOK = !!v; updateBioButton(); return bioOK; })
+          .catch(function(){ bioOK = false; updateBioButton(); return false; });
+}
+function b64url(buf){
+  var b = new Uint8Array(buf), s = '';
+  for(var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function fromB64url(str){
+  var s = String(str).replace(/-/g, '+').replace(/_/g, '/');
+  while(s.length % 4) s += '=';
+  var bin = atob(s), a = new Uint8Array(bin.length);
+  for(var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return a.buffer;
+}
+function registerBioCredential(){
+  return new Promise(function(resolve){
+    if(!bioSupported() || !bioOK){ resolve({ok:false, unsupported:true}); return; }
+    try{
+      var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+      var userId = new Uint8Array(16); crypto.getRandomValues(userId);
+      var pk = {
+        challenge: challenge,
+        rp: {name:'메모 💜'},
+        user: {id: userId, name: 'memo-lock', displayName: '메모 잠금'},
+        pubKeyCredParams: [{type:'public-key', alg:-7}, {type:'public-key', alg:-257}],
+        authenticatorSelection: {authenticatorAttachment:'platform', requireResidentKey:false, residentKey:'discouraged', userVerification:'required'},
+        timeout: 60000,
+        attestation: 'none'
+      };
+      navigator.credentials.create({publicKey: pk}).then(function(cred){
+        if(!cred){ resolve({ok:false}); return; }
+        resolve({ok:true, id: b64url(cred.rawId)});
+      }).catch(function(err){ resolve({ok:false, err: err}); });
+    }catch(err){ resolve({ok:false, err: err}); }
+  });
+}
+function bioAssert(){
+  return new Promise(function(resolve){
+    if(!bioSupported() || !lockCfg.credId){ resolve({ok:false, unsupported:true}); return; }
+    try{
+      var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+      var pk = {
+        challenge: challenge,
+        timeout: 60000,
+        userVerification: 'required',
+        allowCredentials: [{type:'public-key', id: fromB64url(lockCfg.credId), transports:['internal']}]
+      };
+      navigator.credentials.get({publicKey: pk}).then(function(a){ resolve({ok: !!a}); })
+        .catch(function(err){ resolve({ok:false, err: err}); });
+    }catch(err){ resolve({ok:false, err: err}); }
+  });
+}
+function bioUnlock(silent){
+  if(bioBusy || !locked) return;
+  if(!lockCfg.bio || !lockCfg.credId){ if(!silent) toast('먼저 지문을 등록해 줘'); return; }
+  if(bioOK === false){ if(!silent) toast('이 브라우저에서는 지문 인증이 지원되지 않아 비밀번호로만 열려요'); return; }
+  bioBusy = true;
+  var myToken = ++bioToken;
+  var btn = document.getElementById('lockBio');
+  if(btn) btn.classList.add('busy');
+  setLockSub('지문을 확인하고 있어…', false);
+  bioAssert().then(function(r){
+    if(myToken !== bioToken) return;
+    bioBusy = false;
+    suppressUntil = Date.now() + 2500;
+    if(btn) btn.classList.remove('busy');
+    if(r.ok){
+      vibrate(12);
+      hideLock();
+    }else{
+      setLockSub('지문 대신 비밀번호로 열어 줘', false);
+      updateBioButton();
+      if(!silent) toast('지문을 확인하지 못했어. 비밀번호로 열어 줘');
+    }
+  });
+}
+
+/* ── 잠금 설정 시트 ── */
+function renderLockSheet(){
+  if(!cryptoOK()){
+    openSheet(
+      '<div class="sh-title">🔒 암호 잠금</div>' +
+      '<div class="sh-desc">지금 주소에서는 잠금을 설정할 수 없어.<br>https 주소(GitHub Pages)에서 열면 4자리 비밀번호와 지문으로 잠글 수 있어.</div>' +
+      '<div class="sheet-actions"><button class="btn primary" data-act="closeSheet">알겠어</button></div>'
+    );
+    return;
+  }
+  var on = lockOn();
+  var bioOn = !!(on && lockCfg.bio && lockCfg.credId);
+  var bioLine;
+  if(!on) bioLine = '<small>PIN 잠금을 켜면 함께 쓸 수 있어</small>';
+  else if(bioOK === null) bioLine = '<small>지문 지원 여부를 확인하고 있어…</small>';
+  else if(bioOK === false) bioLine = '<small>이 브라우저에서는 지문 인증이 지원되지 않아 비밀번호로만 열려요</small>';
+  else if(bioOn) bioLine = '<small>등록됨 · 이 기기 지문으로 열 수 있어</small>';
+  else bioLine = '<small>이 기기의 지문으로 열 수 있게 등록해</small>';
+
+  openSheet(
+    '<div class="sh-title">🔒 암호 잠금</div>' +
+    '<div class="sh-desc">앱을 열 때 4자리 비밀번호로 가려 둘 수 있어.<br>잠금 설정은 메모와 따로 저장되고, 메모 내용은 그대로야.</div>' +
+    '<button class="lockrow" type="button" data-act="lockPinRow">' +
+      '<span class="lr-ico">🔐</span>' +
+      '<span class="lr-t">PIN 잠금 4자리<small>' + (on ? '켜짐 · 앱을 열 때 비밀번호를 물어봐' : '꺼짐 · 누구나 앱을 열 수 있어') + '</small></span>' +
+      '<span class="switch ' + (on ? 'on' : '') + '"></span>' +
+    '</button>' +
+    '<button class="lockrow" type="button" data-act="lockBioRow"' + (!on || bioOK === false ? ' disabled' : '') + '>' +
+      '<span class="lr-ico">👆</span>' +
+      '<span class="lr-t">지문으로 열기' + bioLine + '</span>' +
+      '<span class="switch ' + (bioOn ? 'on' : '') + '"></span>' +
+    '</button>' +
+    (on
+      ? '<button class="lockrow" type="button" data-act="lockChangePin"><span class="lr-ico">🔁</span><span class="lr-t">비밀번호 변경<small>지금 쓰는 비밀번호를 먼저 확인해</small></span>' + ICON.arrow + '</button>' +
+        '<button class="lockrow danger" type="button" data-act="lockTurnOff"><span class="lr-ico">🔓</span><span class="lr-t">잠금 끄기<small>지금 쓰는 비밀번호를 넣으면 꺼져</small></span></button>'
+      : '') +
+    '<div class="sh-note">비밀번호를 잊으면 앱을 열 수 없어. 중요한 메모는 가끔 백업해 둬.<br>지문은 이 기기 브라우저에만 등록되고 서버로 보내지 않아.</div>' +
+    '<div class="sh-version">메모 1.1.0 · 잠금 기능</div>' +
+    '<div class="sheet-actions"><button class="btn ghost" data-act="closeSheet">닫기</button></div>'
+  );
+}
+function lockSettingsSheet(){
+  renderLockSheet();
+  checkBio().then(function(){
+    if(sheet.classList.contains('on') && document.querySelector('[data-act="lockPinRow"]')) renderLockSheet();
+  });
+}
+
+function askPinSheet(cfg){
+  pinSheetCb = cfg;
+  openSheet(
+    '<div class="sh-title">' + esc(cfg.title) + '</div>' +
+    '<div class="sh-desc">' + esc(cfg.desc || '') + '</div>' +
+    '<label class="fld"><span>숫자 4자리</span>' +
+      '<input class="pinfield" id="pinField" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••" aria-label="비밀번호 4자리"></label>' +
+    (cfg.note ? '<div class="sh-note">' + esc(cfg.note) + '</div>' : '') +
+    '<div class="sheet-actions">' +
+      '<button class="btn ghost" data-act="closeSheet">취소</button>' +
+      '<button class="btn primary" data-act="pinSheetOk">' + esc(cfg.ok || '확인') + '</button>' +
+    '</div>'
+  );
+  setTimeout(function(){
+    var f = document.getElementById('pinField');
+    if(!f) return;
+    try{ f.focus(); }catch(e){}
+    f.addEventListener('input', function(){
+      var v = String(this.value || '').replace(/[^0-9]/g, '').slice(0, 4);
+      if(v !== this.value) this.value = v;
+    });
+    f.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); submitPinSheet(); }
+    });
+  }, 120);
+}
+function submitPinSheet(){
+  var f = document.getElementById('pinField');
+  if(!f) return;
+  var v = String(f.value || '');
+  if(!/^\d{4}$/.test(v)){ try{ f.focus(); }catch(e){} toast('숫자 4자리를 넣어 줘'); return; }
+  var cb = pinSheetCb;
+  if(cb && cb.onSubmit) cb.onSubmit(v);
+}
+function askCurrentPin(title, okLabel, onVerified){
+  askPinSheet({
+    title: title,
+    desc: '지금 쓰는 비밀번호 4자리를 넣어 줘.',
+    ok: okLabel,
+    onSubmit: function(pin){
+      verifyPin(pin).then(function(ok){
+        if(ok) onVerified();
+        else { toast('비밀번호가 맞지 않아'); setTimeout(function(){ askCurrentPin(title, okLabel, onVerified); }, 600); }
+      });
+    }
+  });
+}
+function flowSetPin(){
+  askPinSheet({
+    title:'PIN 잠금 켜기',
+    desc:'앱을 열 때 물어볼 숫자 4자리를 정해 줘.',
+    ok:'다음',
+    note:'생일 같은 쉬운 숫자보다는 나만 아는 숫자를 골라 줘.',
+    onSubmit: function(p1){
+      askPinSheet({
+        title:'한 번 더 입력',
+        desc:'확인을 위해 같은 숫자를 한 번 더 넣어 줘.',
+        ok:'잠금 켜기',
+        onSubmit: function(p2){
+          if(p1 !== p2){ toast('두 번 넣은 숫자가 달라. 처음부터 다시 할게'); setTimeout(flowSetPin, 550); return; }
+          setPin(p1).then(function(){
+            closeSheet();
+            toast('잠금을 켰어 🔒 다음에 열 때 비밀번호를 물어볼게');
+          }).catch(function(){ toast('잠금을 켜지 못했어 😢'); });
+        }
+      });
+    }
+  });
+}
+function flowChangePin(){
+  askCurrentPin('비밀번호 변경', '확인', function(){
+    askPinSheet({
+      title:'새 비밀번호',
+      desc:'새로 쓸 숫자 4자리를 정해 줘.',
+      ok:'다음',
+      onSubmit: function(p1){
+        askPinSheet({
+          title:'한 번 더 입력',
+          desc:'확인을 위해 같은 숫자를 한 번 더 넣어 줘.',
+          ok:'바꾸기',
+          onSubmit: function(p2){
+            if(p1 !== p2){ toast('두 번 넣은 숫자가 달라. 처음부터 다시 할게'); setTimeout(flowChangePin, 550); return; }
+            setPin(p1).then(function(){
+              closeSheet();
+              toast('비밀번호를 바꿨어 🔒');
+            });
+          }
+        });
+      }
+    });
+  });
+}
+function flowTurnOff(){
+  askCurrentPin('잠금 끄기', '끄기', function(){
+    lockCfg.enabled = false;
+    lockCfg.hash = '';
+    lockCfg.salt = '';
+    lockCfg.bio = false;
+    lockCfg.credId = '';
+    saveLock();
+    closeSheet();
+    toast('잠금을 껐어. 다음부터는 바로 열려');
+  });
+}
+function startBioRegister(){
+  if(bioBusy) return;
+  bioBusy = true;
+  suppressUntil = Date.now() + 2000;
+  registerBioCredential().then(function(r){
+    bioBusy = false;
+    suppressUntil = Date.now() + 2500;
+    if(r.ok){
+      lockCfg.bio = true;
+      lockCfg.credId = r.id;
+      saveLock();
+      if(sheet.classList.contains('on')) renderLockSheet();
+      toast('지문을 등록했어 👆 이제 지문으로 열 수 있어');
+    }else if(r.unsupported){
+      toast('이 브라우저에서는 지문 인증이 지원되지 않아 비밀번호로만 열려요');
+    }else{
+      toast('지문 등록을 마치지 못했어. 다시 해 볼래?');
+    }
+  });
+}
+function onLockBioRow(){
+  if(!lockOn()){ toast('먼저 PIN 잠금을 켜 줘'); return; }
+  if(bioOK === null){ checkBio().then(function(){ renderLockSheet(); if(bioOK) onLockBioRow(); }); return; }
+  if(bioOK === false){ toast('이 브라우저에서는 지문 인증이 지원되지 않아 비밀번호로만 열려요'); return; }
+  if(lockCfg.bio && lockCfg.credId){
+    confirmSheet('지문으로 열기를 끌까?', '비밀번호 4자리는 그대로 쓸 수 있어. 다시 켜면 지문을 새로 등록해.', '끄기', function(){
+      lockCfg.bio = false;
+      lockCfg.credId = '';
+      saveLock();
+      renderLockSheet();
+      toast('지문으로 열기를 껐어');
+    });
+    return;
+  }
+  startBioRegister();
+}
+
+/* ── 잠금 관련 동작 ── */
+lockEl.addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('[data-lk]') : null;
+  if(!b) return;
+  onLockKey(b.dataset.lk);
+});
+document.addEventListener('keydown', function(e){
+  if(!locked) return;
+  if(/^[0-9]$/.test(e.key)){ e.preventDefault(); onLockKey(e.key); }
+  else if(e.key === 'Backspace'){ e.preventDefault(); onLockKey('del'); }
+  else if(e.key === 'Enter'){ e.preventDefault(); if(pinBuf.length === 4) checkPin(); }
+  else if(e.key === 'Escape'){ e.preventDefault(); }
+});
+
+/* 백그라운드 / 새로고침 시 잠금 유지 */
+function armVisibility(){
+  document.addEventListener('visibilitychange', function(){
+    if(!lockOn()) return;
+    if(bioBusy || Date.now() < suppressUntil) return;
+    if(document.visibilityState === 'hidden'){
+      if(!locked) hiddenAt = Date.now();
+      return;
+    }
+    if(document.visibilityState === 'visible' && !locked && hiddenAt){
+      var away = Date.now() - hiddenAt;
+      hiddenAt = 0;
+      if(away >= 800) showLock();
+    }
+  });
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted && lockOn() && !locked) showLock();
+  });
+  document.addEventListener('freeze', function(){
+    if(lockOn() && !locked){ hiddenAt = 0; showLock({noBio:true}); }
+  });
+}
+
+function initLock(){
+  loadLock();
+  updateBioButton();
+  armVisibility();
+  checkBio();
+  if(lockOn()) showLock();
+  else rootEl.classList.remove('lock-pending');
 }
 
 /* ══════════════ 이벤트 ══════════════ */
@@ -1371,6 +1960,18 @@ document.addEventListener('click', function(e){
     case 'delDday': deleteDday(id); return;
     case 'goPinned': goTab('dday'); showView('dday'); renderDday(); return;
     case 'openSettings': settingsSheet(); return;
+    case 'openLockSettings': lockSettingsSheet(); return;
+    case 'lockPinRow':
+      if(lockOn()) askCurrentPin('PIN 잠금 끄기', '끄기', function(){
+        lockCfg.enabled = false; lockCfg.hash = ''; lockCfg.salt = ''; lockCfg.bio = false; lockCfg.credId = '';
+        saveLock(); renderLockSheet(); toast('PIN 잠금을 껐어');
+      });
+      else flowSetPin();
+      return;
+    case 'lockBioRow': onLockBioRow(); return;
+    case 'lockChangePin': flowChangePin(); return;
+    case 'lockTurnOff': flowTurnOff(); return;
+    case 'pinSheetOk': submitPinSheet(); return;
     case 'openGuide': guideSheet(); return;
     case 'exportData': exportData(); return;
     case 'importData': closeSheet(); setTimeout(importData, 120); return;
@@ -1500,6 +2101,7 @@ inputEl.addEventListener('keydown', function(e){
 /* backdrop / esc */
 backdrop.addEventListener('click', closeSheet);
 document.addEventListener('keydown', function(e){
+  if(locked) return;
   if(e.key === 'Escape'){
     if(sheet.classList.contains('on')) closeSheet();
     else if(view === 'room'){ leaveRoom(); }
@@ -1530,6 +2132,7 @@ function boot(){
   showView('list');
   save();
   pushGuard();
+  initLock();
 
   // 첫 실행 안내
   try{
