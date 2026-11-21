@@ -1403,6 +1403,18 @@ var hiddenAt = 0;
 var pinSheetCb = null;
 var lockEl = document.getElementById('lock');
 var rootEl = document.documentElement;
+/* 잠금 중에는 뒤의 앱 화면을 읽거나 누를 수 없게 막는다 */
+function setAppInert(on){
+  try{
+    var app = document.getElementById('app');
+    var nav = document.getElementById('tabbar');
+    [app, nav].forEach(function(el){
+      if(!el) return;
+      if(on){ el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
+      else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
+    });
+  }catch(e){}
+}
 
 function cryptoOK(){
   try{ return !!(window.crypto && window.crypto.subtle && window.crypto.subtle.digest && window.crypto.getRandomValues && window.isSecureContext !== false); }
@@ -1488,6 +1500,7 @@ function showLock(opts){
   lockEl.setAttribute('aria-hidden', 'false');
   lockEl.classList.add('on');
   document.body.classList.add('locked');
+  setAppInert(true);
   pinBuf = '';
   renderDots();
   setLockSub('비밀번호 4자리를 입력해 줘', false);
@@ -1506,6 +1519,7 @@ function hideLock(){
   renderDots();
   lockEl.classList.remove('on');
   document.body.classList.remove('locked');
+  setAppInert(false);
   suppressUntil = Date.now() + 1500;
   setTimeout(function(){
     if(!locked){
