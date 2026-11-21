@@ -363,8 +363,8 @@ body.locked{overflow:hidden}
   .fab{right:calc(50% - 260px + 16px)}
 }
 </style>
-/* 잠금이 켜져 있으면 첫 화면부터 내용을 가려 둔다 (앱 내용이 잠깐 비치지 않도록) */
 <script>
+/* 잠금이 켜져 있으면 첫 화면부터 내용을 가려 둔다 (앱 내용이 잠깐 비치지 않도록) */
 (function(){
   try{
     var c = JSON.parse(localStorage.getItem('ming.memo.lock.v1') || 'null');
