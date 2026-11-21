@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>메모 💜</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#B39DDB">
+<meta name="color-scheme" content="light">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="메모">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%239575CD'/%3E%3Crect x='13' y='16' width='38' height='27' rx='8' fill='white'/%3E%3Cpath d='M23 43h18l-9 9z' fill='white'/%3E%3Crect x='19' y='23' width='19' height='3' rx='1.5' fill='%23C9B4F2'/%3E%3Crect x='19' y='30' width='26' height='3' rx='1.5' fill='%23DCCDF7'/%3E%3C/svg%3E">
+<style>
+:root{
+  --lav-bg:#F5F1FF;
+  --lav-bg2:#EFE9FB;
+  --lav:#9575CD;
+  --lav-deep:#7E57C2;
+  --lav-mid:#B39DDB;
+  --lav-soft:#E3D7FF;
+  --lav-line:#EDE6F9;
+  --ink:#312B40;
+  --ink2:#6E6788;
+  --ink3:#A29AB8;
+  --white:#fff;
+  --danger:#E0577A;
+  --radius:18px;
+  --sab:env(safe-area-inset-bottom, 0px);
+  --sat:env(safe-area-inset-top, 0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;color-scheme:light}
+body{
+  margin:0;
+  font-family:'Pretendard','Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color:var(--ink);
+  background:var(--lav-bg);
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior:none;
+  font-size:15px;
+  line-height:1.45;
+}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea{font-family:inherit;font-size:16px;color:inherit}
+h1,h2,h3,p{margin:0}
+svg{display:block}
+
+/* ── shell ─────────────────────────────── */
+#app{position:fixed;inset:0;overflow:hidden;background:var(--lav-bg)}
+.view{position:absolute;inset:0;display:none;flex-direction:column;background:var(--lav-bg)}
+.view.on{display:flex}
+@keyframes slideIn{from{transform:translateX(28px);opacity:.4}to{transform:none;opacity:1}}
+#view-room.on{animation:slideIn .22s cubic-bezier(.2,.7,.3,1)}
+.scroll{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* ── topbar ────────────────────────────── */
+.topbar{flex:0 0 auto;background:rgba(255,255,255,.92);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--lav-line);padding-top:var(--sat);position:relative;z-index:5}
+.topbar-inner{height:56px;display:flex;align-items:center;gap:6px;padding:0 8px 0 14px}
+.topbar h1{font-size:19px;font-weight:800;letter-spacing:-.4px;display:flex;align-items:center;gap:7px}
+.brand-mark{font-size:17px;filter:drop-shadow(0 1px 2px rgba(126,87,194,.25))}
+.tb-actions{margin-left:auto;display:flex;align-items:center;gap:2px}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:14px;color:var(--ink2);transition:background .15s,color .15s}
+.icon-btn:active{background:var(--lav-bg2);color:var(--lav-deep)}
+.txt-btn{height:34px;padding:0 10px;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--lav-deep)}
+.txt-btn:active{background:var(--lav-bg2)}
+.txt-btn.on{background:var(--lav-soft)}
+
+/* ── chat list ─────────────────────────── */
+#view-list{background:#fff}
+#listBody{padding-bottom:calc(96px + var(--sab))}
+.pin-wrap{padding:12px 14px 4px}
+.pinbanner{width:100%;display:flex;align-items:center;gap:12px;text-align:left;
+  background:linear-gradient(135deg,#A88BDF 0%,#8E6BD8 55%,#7E57C2 100%);
+  color:#fff;border-radius:20px;padding:14px 16px;
+  box-shadow:0 10px 24px -10px rgba(126,87,194,.65);position:relative;overflow:hidden}
+.pinbanner::after{content:"";position:absolute;right:-28px;top:-34px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.13)}
+.pinbanner::before{content:"";position:absolute;right:34px;bottom:-46px;width:86px;height:86px;border-radius:50%;background:rgba(255,255,255,.09)}
+.pb-label{font-size:23px;font-weight:800;letter-spacing:-.8px;line-height:1.1}
+.pb-main{min-width:0;flex:1;position:relative;display:flex;flex-direction:column;align-items:flex-start}
+.pb-title{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-date{display:block;font-size:11.5px;opacity:.82;margin-top:2px;font-weight:500}
+.pb-tag{font-size:10px;font-weight:800;letter-spacing:.4px;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:999px;display:inline-block;margin-bottom:5px;align-self:flex-start}
+
+.section-label{padding:14px 18px 6px;font-size:12px;font-weight:700;color:var(--ink3);letter-spacing:.2px}
+.crow{display:flex;align-items:center;gap:12px;padding:11px 14px;position:relative;cursor:pointer;transition:background .12s}
+.crow:active{background:#FAF7FF}
+.crow+.crow::before{content:"";position:absolute;left:74px;right:0;top:0;height:1px;background:#F4EFFC}
+.av{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:23px;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}
+.av.sm{width:34px;height:34px;border-radius:11px;font-size:17px}
+.cmain{flex:1;min-width:0}
+.cname{font-size:15px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:6px}
+.cprev{font-size:13px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cmeta{flex:0 0 auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.ctime{font-size:11px;color:var(--ink3)}
+.badge{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--lav);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.cedit{display:flex;gap:4px;margin-left:2px}
+.cedit button{width:34px;height:34px;border-radius:11px;background:var(--lav-bg2);display:grid;place-items:center;font-size:15px}
+.addrow{display:flex;align-items:center;gap:10px;margin:10px 14px;width:calc(100% - 28px);padding:14px;border-radius:18px;border:1.5px dashed #DCD1F2;color:var(--lav-deep);font-weight:700;font-size:14px;justify-content:center;background:#FCFAFF}
+.addrow:active{background:var(--lav-bg2)}
+
+/* empty */
+.empty{padding:44px 30px 30px;text-align:center;color:var(--ink3)}
+.empty .big{font-size:40px;margin-bottom:12px}
+.empty .et{font-size:15px;font-weight:700;color:var(--ink2)}
+.empty .ed{font-size:13px;margin-top:6px;line-height:1.6}
+.empty .eb{margin-top:18px;display:inline-flex;align-items:center;gap:6px;background:var(--lav);color:#fff;font-weight:700;font-size:14px;padding:11px 18px;border-radius:14px;box-shadow:0 8px 18px -8px rgba(126,87,194,.8)}
+
+/* ── room ──────────────────────────────── */
+.room-head{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.rh-txt{min-width:0}
+.rh-name{font-size:15.5px;font-weight:800;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rh-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+.msgs{
+  padding:14px 14px 8px;
+  background-color:#F3EEFC;
+  background-image:
+    radial-gradient(circle at 16% 8%, rgba(149,117,205,.13), transparent 44%),
+    radial-gradient(circle at 86% 82%, rgba(179,157,219,.16), transparent 48%),
+    radial-gradient(rgba(126,87,194,.07) 1px, transparent 1px);
+  background-size:auto,auto,17px 17px;
+  background-attachment:local;
+}
+.daydiv{display:flex;justify-content:center;margin:10px 0 14px}
+.daydiv span{background:rgba(255,255,255,.78);color:#8B82A3;font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;backdrop-filter:blur(6px)}
+.sysnote{margin:6px auto 14px;max-width:320px;text-align:center;font-size:11.5px;line-height:1.65;color:#8A819F;background:rgba(255,255,255,.66);border-radius:14px;padding:10px 13px}
+.msg{display:flex;flex-direction:column;align-items:flex-end;margin-bottom:9px}
+.msg .line{display:flex;justify-content:flex-end;max-width:82%;position:relative}
+.bbl{
+  background:var(--lav-soft);
+  color:#352A52;
+  padding:10px 13px;
+  border-radius:17px 17px 5px 17px;
+  font-size:14.5px;
+  line-height:1.5;
+  letter-spacing:-.1px;
+  white-space:pre-wrap;
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+  box-shadow:0 2px 7px -2px rgba(126,87,194,.22);
+  transition:background .18s,transform .12s;
+  max-width:100%;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.bbl:active{transform:scale(.985)}
+.bbl.todo{display:flex;align-items:flex-start;gap:9px;padding-right:14px}
+.cbx{width:19px;height:19px;border-radius:7px;border:2px solid #B9A6E6;background:#fff;flex:0 0 auto;margin-top:1px;display:grid;place-items:center;color:#fff;transition:background .16s,border-color .16s}
+.bbl.todo.done{background:#F1ECFA;color:#8C83A6;box-shadow:none}
+.bbl.todo.done .btxt{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:#B0A6C9}
+.bbl.todo.done .cbx{background:var(--lav);border-color:var(--lav)}
+.mmeta{display:flex;align-items:center;gap:5px;margin-top:3px;padding-right:2px}
+.mtime{font-size:10.5px;color:#9C93B3;letter-spacing:.1px}
+.medited{font-size:10px;color:#B4ABc8}
+.msg.pending .bbl{opacity:.85}
+
+/* composer */
+.editbar[hidden]{display:none}
+.editbar{display:flex;align-items:center;gap:8px;padding:7px 14px;background:#F1EAFE;border-top:1px solid #E4DAF7;font-size:12px;color:var(--lav-deep);font-weight:700}
+.editbar .ex{margin-left:auto;width:26px;height:26px;border-radius:50%;background:rgba(126,87,194,.12);display:grid;place-items:center;color:var(--lav-deep)}
+.composer{flex:0 0 auto;background:#fff;border-top:1px solid var(--lav-line);padding:7px 10px calc(8px + var(--sab));box-shadow:0 -6px 20px -14px rgba(80,50,140,.35)}
+.seg{display:flex;gap:4px;padding:3px;background:var(--lav-bg2);border-radius:999px;width:max-content;margin:0 2px 6px}
+.seg-btn{font-size:12.5px;font-weight:700;color:var(--ink3);padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:4px;transition:background .16s,color .16s,box-shadow .16s}
+.seg-btn.on{background:#fff;color:var(--lav-deep);box-shadow:0 2px 6px -2px rgba(126,87,194,.4)}
+.inputrow{display:flex;align-items:flex-end;gap:8px}
+#input{
+  flex:1;min-height:42px;max-height:112px;resize:none;border:0;outline:none;
+  background:var(--lav-bg);border-radius:21px;padding:10px 15px;line-height:1.45;
+  font-size:15px;letter-spacing:-.1px;overflow-y:auto;
+}
+#input::placeholder{color:#AFA6C4}
+.send{width:44px;height:44px;flex:0 0 auto;border-radius:50%;background:linear-gradient(140deg,#A98BE0,#7E57C2);color:#fff;display:grid;place-items:center;box-shadow:0 6px 16px -6px rgba(126,87,194,.9);transition:transform .12s,opacity .2s}
+.send:active{transform:scale(.93)}
+.send:disabled{opacity:.4;box-shadow:none}
+
+/* ── checklist ─────────────────────────── */
+#view-check .scroll{padding-bottom:calc(96px + var(--sab))}
+.summary{margin:14px 14px 6px;background:#fff;border-radius:20px;padding:16px 16px 14px;box-shadow:0 8px 24px -18px rgba(80,50,140,.5);border:1px solid #F0EAFB}
+.sm-top{display:flex;align-items:baseline;gap:8px}
+.sm-num{font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--lav-deep)}
+.sm-txt{font-size:13px;color:var(--ink2);font-weight:600}
+.sm-sub{margin-left:auto;font-size:11.5px;color:var(--ink3)}
+.bar{height:7px;border-radius:999px;background:#EFE9FA;margin-top:11px;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#B39DDB,#7E57C2);transition:width .35s ease}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:8px 14px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:7px 13px;border-radius:999px;background:#fff;border:1px solid #EDE6F9;font-size:12.5px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.chip.on{background:var(--lav-deep);border-color:var(--lav-deep);color:#fff;box-shadow:0 6px 14px -8px rgba(126,87,194,.9)}
+.chip .cnt{opacity:.6;font-weight:600}
+.glabel{padding:12px 18px 6px;font-size:11.5px;font-weight:800;color:var(--ink3);letter-spacing:.3px}
+.trow{display:flex;align-items:flex-start;gap:11px;margin:0 14px 8px;padding:12px 12px 12px 13px;background:#fff;border-radius:16px;box-shadow:0 4px 14px -12px rgba(80,50,140,.5);border:1px solid #F3EEFB;transition:opacity .2s}
+.trow.done{background:#FBFAFE;box-shadow:none}
+.check{width:24px;height:24px;flex:0 0 auto;border-radius:9px;border:2px solid #B7A3E6;background:#fff;display:grid;place-items:center;color:#fff;margin-top:1px;transition:background .16s,border-color .16s,transform .12s}
+.check:active{transform:scale(.9)}
+.trow.done .check{background:var(--lav);border-color:var(--lav)}
+.tmain{flex:1;min-width:0}
+.ttxt{font-size:14.5px;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
+.trow.done .ttxt{color:#9C93B3;text-decoration:line-through;text-decoration-color:#C0B6D6}
+.tmeta{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:11px;color:var(--ink3)}
+.tag{background:var(--lav-bg2);color:#7A6A9E;padding:2px 7px;border-radius:7px;font-weight:700;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.tdel{width:26px;height:26px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;color:#C3BAD6;font-size:15px;margin-top:1px}
+.tdel:active{background:#FBEEF3;color:var(--danger)}
+
+/* ── dday ──────────────────────────────── */
+#view-dday{background:var(--lav-bg)}
+.dwrap{padding:12px 14px calc(100px + var(--sab))}
+.dcard{position:relative;display:flex;align-items:center;gap:14px;background:#fff;border-radius:20px;padding:16px 14px 16px 18px;margin-bottom:10px;box-shadow:0 8px 22px -18px rgba(80,50,140,.6);border:1px solid #F1ECFB;overflow:hidden}
+.dcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent,#C9B4F2)}
+.dnum{min-width:66px;font-size:22px;font-weight:800;letter-spacing:-1px;color:var(--lav-deep);line-height:1.1}
+.dnum small{display:block;font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:0;margin-top:3px}
+.dinfo{flex:1;min-width:0}
+.dtitle{font-size:15px;font-weight:700;letter-spacing:-.2px;word-break:break-word}
+.ddate{font-size:11.5px;color:var(--ink3);margin-top:3px}
+.dcard.past{opacity:.72}
+.dcard.pinned{background:linear-gradient(135deg,#FBF7FF,#F1E9FF);border-color:#E3D5FA}
+.dpin{width:36px;height:36px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;color:#C9BEE0}
+.dpin.on{color:#F2B233}
+.pin-tag{font-size:9.5px;font-weight:800;color:#8E6BD8;background:#fff;border:1px solid #E6DBFA;padding:1px 7px;border-radius:999px;display:inline-block;margin-bottom:5px}
+.dday-empty{padding-top:26px}
+
+/* ── tabbar ────────────────────────────── */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;
+  background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(16px);-webkit-backdrop-filter:saturate(160%) blur(16px);
+  border-top:1px solid var(--lav-line);padding-bottom:var(--sab);transition:transform .24s ease}
+.tabbar.hide{transform:translateY(120%)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;color:#B4AAC6;font-size:10.5px;font-weight:700;letter-spacing:.1px}
+.tab.on{color:var(--lav-deep)}
+.tab .ico{position:relative;width:24px;height:24px;display:grid;place-items:center}
+.tab.on .ico{filter:drop-shadow(0 3px 6px rgba(126,87,194,.35))}
+/* 미완료 할 일 숫자 — 아이콘 오른쪽 위에 살짝 떠 있는 보라 알약 */
+.tab .ico b{position:absolute;top:-5px;right:-9px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
+  background:linear-gradient(140deg,#A98BE0,#7E57C2);color:#fff;font-size:9.5px;font-weight:800;line-height:1;
+  display:flex;align-items:center;justify-content:center;letter-spacing:0;white-space:nowrap;
+  border:1.5px solid #fff;box-shadow:0 2px 6px rgba(94,60,150,.38)}
+.tab .ico b[hidden]{display:none}
+
+/* ── fab ───────────────────────────────── */
+.fab{position:fixed;right:16px;bottom:calc(78px + var(--sab));z-index:35;height:50px;padding:0 18px 0 14px;border-radius:18px;
+  display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;color:#fff;
+  background:linear-gradient(140deg,#A98BE0,#7E57C2);box-shadow:0 12px 24px -10px rgba(126,87,194,.85);
+  transition:transform .14s}
+.fab:active{transform:scale(.95)}
+
+/* ── sheet ─────────────────────────────── */
+#backdrop{position:fixed;inset:0;background:rgba(45,30,75,.34);opacity:0;pointer-events:none;transition:opacity .22s;z-index:60;backdrop-filter:blur(2px)}
+#backdrop.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:#fff;border-radius:24px 24px 0 0;
+  padding:8px 16px calc(18px + var(--sab));transform:translateY(102%);transition:transform .26s cubic-bezier(.2,.8,.3,1);
+  max-height:88%;overflow-y:auto;box-shadow:0 -20px 50px -20px rgba(40,20,70,.45)}
+#sheet.on{transform:none}
+.grab{width:38px;height:4px;border-radius:99px;background:#E6DEF4;margin:4px auto 12px}
+.sh-title{font-size:17px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px}
+.sh-desc{font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:14px}
+.fld{display:block;margin-bottom:14px}
+.fld>span{display:block;font-size:11.5px;font-weight:800;color:var(--ink3);margin-bottom:6px;letter-spacing:.2px}
+.fld input[type=text],.fld input[type=date],.fld textarea{
+  width:100%;border:1.5px solid #EDE6F9;background:#FBFAFE;border-radius:14px;padding:12px 13px;outline:none;font-size:15px;transition:border-color .16s,background .16s}
+.fld input:focus,.fld textarea:focus{border-color:var(--lav-mid);background:#fff}
+.fld textarea{resize:none;min-height:76px;line-height:1.5}
+.emoji-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:5px}
+.emo{aspect-ratio:1;border-radius:11px;background:#FBFAFE;border:1.5px solid #F0EAFB;display:grid;place-items:center;font-size:17px;transition:background .14s,border-color .14s,transform .12s}
+.emo.on{background:var(--lav-soft);border-color:var(--lav-mid);transform:scale(1.04)}
+.sheet-actions{display:flex;gap:8px;margin-top:16px}
+.btn{flex:1;height:50px;border-radius:16px;font-weight:800;font-size:15px;display:grid;place-items:center;transition:transform .12s,background .16s}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:linear-gradient(140deg,#A98BE0,#7E57C2);color:#fff;box-shadow:0 10px 22px -12px rgba(126,87,194,.95)}
+.btn.ghost{background:var(--lav-bg2);color:var(--ink2)}
+.btn.danger{background:#FDF0F4;color:var(--danger);flex:0 0 96px}
+.menu-list{display:flex;flex-direction:column;margin:2px -4px 0}
+.menu-item{display:flex;align-items:center;gap:12px;padding:15px 8px;border-radius:14px;font-size:15px;font-weight:600;text-align:left;width:100%}
+.menu-item:active{background:var(--lav-bg)}
+.menu-item .mi{width:26px;text-align:center;font-size:16px}
+.menu-item.danger{color:var(--danger)}
+.menu-item small{display:block;font-size:11.5px;color:var(--ink3);font-weight:500;margin-top:2px}
+.chipsel{display:flex;gap:6px;flex-wrap:wrap}
+.chipsel .cs{padding:8px 12px;border-radius:12px;background:#FBFAFE;border:1.5px solid #F0EAFB;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.chipsel .cs.on{background:var(--lav-soft);border-color:var(--lav-mid);color:#5E4694}
+.switch-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#FBFAFE;border:1.5px solid #F0EAFB}
+.switch-row .st{flex:1;font-size:14px;font-weight:700}
+.switch-row .st small{display:block;font-size:11.5px;color:var(--ink3);font-weight:500;margin-top:2px}
+.switch{width:46px;height:27px;border-radius:99px;background:#E2D9F2;position:relative;transition:background .2s;flex:0 0 auto}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(60,30,110,.25)}
+.switch.on{background:var(--lav)}
+.switch.on::after{transform:translateX(19px)}
+
+/* ── toast ─────────────────────────────── */
+#toast{position:fixed;left:50%;bottom:calc(88px + var(--sab));transform:translate(-50%,20px);z-index:80;
+  background:rgba(43,32,64,.94);color:#fff;border-radius:14px;padding:12px 16px;font-size:13px;font-weight:600;word-break:keep-all;
+  display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:88vw;
+  box-shadow:0 14px 30px -14px rgba(0,0,0,.6)}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast button{color:#D9C6FF;font-weight:800;font-size:13px;white-space:nowrap}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .28s cubic-bezier(.2,.8,.3,1)}
+@media (min-width:520px){
+  #app{max-width:520px;left:50%;transform:translateX(-50%);box-shadow:0 0 60px rgba(70,40,120,.14)}
+  .tabbar{max-width:520px;left:50%;transform:translateX(-50%)}
+  .tabbar.hide{transform:translateX(-50%) translateY(120%)}
+  .fab{right:calc(50% - 260px + 16px)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══ 채팅 목록 ═══ -->
+  <section class="view on" id="view-list">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <h1><span class="brand-mark">💜</span>메모</h1>
+        <div class="tb-actions">
+          <button class="txt-btn" id="editBtn" data-act="toggleEdit">편집</button>
+          <button class="icon-btn" data-act="addCategory" aria-label="카테고리 추가">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button class="icon-btn" data-act="openSettings" aria-label="메뉴 더보기">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <div class="scroll" id="listScroll">
+      <div id="listBody"></div>
+    </div>
+  </section>
+
+  <!-- ═══ 채팅방 ═══ -->
+  <section class="view" id="view-room">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <button class="icon-btn" data-act="back" aria-label="뒤로">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <div class="room-head">
+          <span class="av sm" id="roomAv">💬</span>
+          <div class="rh-txt">
+            <div class="rh-name" id="roomName">메모방</div>
+            <div class="rh-sub" id="roomSub"></div>
+          </div>
+        </div>
+        <button class="icon-btn" data-act="roomMenu" aria-label="방 메뉴">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="scroll msgs" id="msgScroll"></div>
+    <div class="editbar" id="editBar" hidden>
+      <span>✎ 메시지 수정 중</span>
+      <button class="ex" data-act="cancelEdit" aria-label="수정 취소">✕</button>
+    </div>
+    <div class="composer">
+      <div class="seg" id="modeSeg">
+        <button class="seg-btn on" data-act="mode" data-mode="memo">💬 메모</button>
+        <button class="seg-btn" data-act="mode" data-mode="todo">✅ 할 일</button>
+      </div>
+      <div class="inputrow">
+        <textarea id="input" rows="1" placeholder="메모를 남겨 봐" enterkeyhint="send" autocomplete="off"></textarea>
+        <button class="send" id="sendBtn" data-act="send" aria-label="보내기"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 체크리스트 ═══ -->
+  <section class="view" id="view-check">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <h1>체크리스트</h1>
+        <div class="tb-actions">
+          <button class="icon-btn" data-act="addTodo" aria-label="할 일 추가">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <div class="scroll" id="checkScroll">
+      <div id="checkSummary"></div>
+      <div class="chips" id="checkChips"></div>
+      <div id="checkBody"></div>
+    </div>
+    <button class="fab" data-act="addTodo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>할 일 추가
+    </button>
+  </section>
+
+  <!-- ═══ 디데이 ═══ -->
+  <section class="view" id="view-dday">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <h1>디데이</h1>
+        <div class="tb-actions">
+          <button class="icon-btn" data-act="addDday" aria-label="디데이 추가">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <div class="scroll" id="ddayScroll">
+      <div class="dwrap" id="ddayBody"></div>
+    </div>
+    <button class="fab" data-act="addDday">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>디데이 추가
+    </button>
+  </section>
+
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button class="tab on" data-act="tab" data-tab="list">
+    <span class="ico"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a7.5 7.5 0 0 1-10.9 6.7L4 19.5l1.4-4.6A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8.6 10.5h6.8M8.6 13.7h4.2"/></svg></span>
+    <span>채팅</span>
+  </button>
+  <button class="tab" data-act="tab" data-tab="check">
+    <span class="ico"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16.5" rx="4.5"/><path d="m7.5 11.5 2.5 2.5 5-5"/><path d="M8 17h6"/></svg>
+      <b id="tabTodoCount" hidden></b></span>
+    <span>체크리스트</span>
+  </button>
+  <button class="tab" data-act="tab" data-tab="dday">
+    <span class="ico"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="4"/><path d="M3.5 9.5h17M8 3.2v3.2M16 3.2v3.2"/><path d="M12 12.4c-1.4-1.4-3.6 0-1.4 2 1.4 1.2 2.8 2.3 2.8 2.3"/></svg></span>
+    <span>디데이</span>
+  </button>
+</nav>
+
+<div id="backdrop"></div>
+<div id="sheet" role="dialog" aria-modal="true"></div>
+<div id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+'use strict';
+
+/* ══════════════ 기본값 / 저장소 ══════════════ */
+var KEY = 'ming.memo.v1';
+
+function defaults(){
+  return {
+    v: 1,
+    categories: [
+      {id:'c_daily', name:'일상 메모', emoji:'💬'},
+      {id:'c_todo',  name:'할 일',    emoji:'✅'},
+      {id:'c_shop',  name:'쇼핑 리스트', emoji:'🛒'}
+    ],
+    messages: [],
+    ddays: [],
+    pinId: null
+  };
+}
+
+var PALETTE = ['#E3D7FF','#D8EFE6','#FFE2D2','#FFD8E8','#D9E7FF','#FFF0C9','#EADCFB','#D8ECF7'];
+var EMOJIS = ['💬','✅','🛒','💜','📌','🎬','🍚','💪','🎁','✈️','💸','📚','🎵','🌷','🌙','🧺','🐣','☕'];
+var WD = ['일','월','화','수','목','금','토'];
+
+var state = load();
+var view = 'list';
+var currentCat = null;
+var composeMode = 'memo';
+var editingMsg = null;
+var checkFilter = 'all';
+var editMode = false;
+var draftEmoji = '💬';
+var draftCat = '';
+var pendingPin = false;
+var undoTimer = null;
+
+function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+
+function normalize(raw){
+  var d = defaults();
+  if(!raw || typeof raw !== 'object') return d;
+  var out = {v:1, categories:[], messages:[], ddays:[], pinId: raw.pinId || null};
+  if(Array.isArray(raw.categories)){
+    raw.categories.forEach(function(c){
+      if(!c || typeof c !== 'object' || !c.name) return;
+      out.categories.push({
+        id: String(c.id || uid('c_')),
+        name: String(c.name).slice(0,30),
+        emoji: String(c.emoji || '💬').slice(0,4)
+      });
+    });
+  }else{
+    out.categories = d.categories;
+  }
+  var ids = {};
+  out.categories.forEach(function(c){ ids[c.id] = 1; });
+  if(Array.isArray(raw.messages)){
+    raw.messages.forEach(function(m){
+      if(!m || typeof m !== 'object' || typeof m.text !== 'string') return;
+      if(!ids[m.catId]) return;
+      var type = m.type === 'todo' ? 'todo' : 'memo';
+      out.messages.push({
+        id: String(m.id || uid('m_')),
+        catId: m.catId,
+        type: type,
+        text: m.text.slice(0, 2000),
+        createdAt: Number(m.createdAt) || Date.now(),
+        done: type === 'todo' ? !!m.done : false,
+        doneAt: Number(m.doneAt) || 0,
+        editedAt: Number(m.editedAt) || 0
+      });
+    });
+  }
+  if(Array.isArray(raw.ddays)){
+    raw.ddays.forEach(function(x){
+      if(!x || typeof x !== 'object' || !x.title) return;
+      var date = /^\d{4}-\d{2}-\d{2}$/.test(String(x.date)) ? String(x.date) : isoDate(0);
+      out.ddays.push({
+        id: String(x.id || uid('d_')),
+        title: String(x.title).slice(0,60),
+        date: date,
+        createdAt: Number(x.createdAt) || Date.now()
+      });
+    });
+  }
+  if(out.pinId && !out.ddays.some(function(x){ return x.id === out.pinId; })) out.pinId = null;
+  return out;
+}
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return defaults();
+    return normalize(JSON.parse(raw));
+  }catch(e){
+    return defaults();
+  }
+}
+var saveFailed = false;
+function save(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(state));
+    saveFailed = false;
+  }catch(e){
+    if(!saveFailed){ saveFailed = true; toast('저장 공간이 가득 찼어. 백업을 받아 두는 게 좋아 😢'); }
+  }
+}
+
+/* ══════════════ 날짜/시간 ══════════════ */
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function isoDate(offsetDays){
+  var d = new Date();
+  if(offsetDays) d.setDate(d.getDate() + offsetDays);
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+function fmtTime(ts){
+  var d = new Date(ts);
+  var h = d.getHours();
+  var ap = h < 12 ? '오전' : '오후';
+  h = h % 12 || 12;
+  return ap + ' ' + h + ':' + pad(d.getMinutes());
+}
+function sameDay(a, b){
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+function fmtListTime(ts){
+  var d = new Date(ts), n = new Date();
+  if(sameDay(d, n)) return fmtTime(ts);
+  var y = new Date(n); y.setDate(n.getDate() - 1);
+  if(sameDay(d, y)) return '어제';
+  if(d.getFullYear() === n.getFullYear()) return (d.getMonth()+1) + '월 ' + d.getDate() + '일';
+  return d.getFullYear() + '. ' + (d.getMonth()+1) + '. ' + d.getDate() + '.';
+}
+function fmtDayDivider(ts){
+  var d = new Date(ts), n = new Date();
+  if(sameDay(d, n)) return '오늘';
+  return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 ' + WD[d.getDay()] + '요일';
+}
+function fmtFullDate(dateStr){
+  var p = dateStr.split('-');
+  var d = new Date(+p[0], +p[1]-1, +p[2]);
+  return d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 (' + WD[d.getDay()] + ')';
+}
+function dayDiff(dateStr){
+  var p = dateStr.split('-');
+  var target = new Date(+p[0], +p[1]-1, +p[2]);
+  var n = new Date();
+  var today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  return Math.round((target - today) / 86400000);
+}
+function ddayLabel(dateStr){
+  var diff = dayDiff(dateStr);
+  if(diff === 0) return 'D-Day';
+  return diff > 0 ? 'D-' + diff : 'D+' + (-diff);
+}
+function ddaySub(dateStr){
+  var diff = dayDiff(dateStr);
+  if(diff === 0) return '바로 오늘!';
+  if(diff > 0) return diff + '일 남았어';
+  return (-diff) + '일 지났어';
+}
+
+/* ══════════════ 공통 UI ══════════════ */
+var tabbar = document.getElementById('tabbar');
+var backdrop = document.getElementById('backdrop');
+var sheet = document.getElementById('sheet');
+var toastEl = document.getElementById('toast');
+
+var ICON = {
+  send: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6 11.8 20 4.4l-7.2 15.4-1.9-6.2-6.3-1.8Z"/></svg>',
+  checkSend: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.8 4.4 4.4L19 6.8"/></svg>',
+  star: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="m12 3.6 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.5 9.8l5.9-.9L12 3.6Z"/></svg>',
+  starOn: '<svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m12 3.6 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.5 9.8l5.9-.9L12 3.6Z"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>'
+};
+
+function vibrate(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+var toastTimer = null;
+function toast(msg, actionLabel, onAction, ms){
+  clearTimeout(toastTimer);
+  toastEl.innerHTML = '<span>' + esc(msg) + '</span>' +
+    (actionLabel ? '<button data-act="toastAction">' + esc(actionLabel) + '</button>' : '');
+  toastEl.classList.add('on');
+  toastEl._action = onAction || null;
+  toastTimer = setTimeout(function(){
+    toastEl.classList.remove('on');
+    toastEl._action = null;
+  }, ms || 2600);
+}
+
+function openSheet(html){
+  sheet.innerHTML = '<div class="grab"></div>' + html;
+  backdrop.classList.add('on');
+  sheet.classList.add('on');
+  sheet.scrollTop = 0;
+}
+function closeSheet(){
+  backdrop.classList.remove('on');
+  sheet.classList.remove('on');
+  setTimeout(function(){
+    if(!sheet.classList.contains('on')) sheet.innerHTML = '';
+  }, 280);
+}
+function confirmSheet(title, desc, okLabel, onOk, danger){
+  openSheet(
+    '<div class="sh-title">' + esc(title) + '</div>' +
+    '<div class="sh-desc">' + esc(desc) + '</div>' +
+    '<div class="sheet-actions">' +
+      '<button class="btn ghost" data-act="closeSheet">취소</button>' +
+      '<button class="btn ' + (danger ? 'danger' : 'primary') + '" data-act="confirmOk" style="flex:1">' + esc(okLabel) + '</button>' +
+    '</div>'
+  );
+  sheet._onOk = onOk;
+}
+
+/* ══════════════ 탭 / 화면 ══════════════ */
+function showView(name){
+  view = name;
+  ['list','room','check','dday'].forEach(function(v){
+    document.getElementById('view-' + v).classList.toggle('on', v === name);
+  });
+  tabbar.classList.toggle('hide', name === 'room');
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.classList.toggle('on', t.dataset.tab === name);
+  });
+  var el = document.getElementById('view-' + name);
+  el.scrollTop = 0;
+}
+function goTab(name){
+  if(name === 'list'){ currentCat = null; renderList(); }
+  if(name === 'check') renderCheck();
+  if(name === 'dday') renderDday();
+  showView(name === 'room' ? 'room' : name);
+}
+
+/* ══════════════ 목록 ══════════════ */
+function catEmojiIndex(cat){
+  var i = state.categories.findIndex(function(c){ return c.id === cat.id; });
+  return i < 0 ? 0 : i;
+}
+function renderList(){
+  var body = document.getElementById('listBody');
+  var sc = document.getElementById('listScroll');
+  var top = sc.scrollTop;
+  var html = '';
+
+  var pin = state.ddays.filter(function(d){ return d.id === state.pinId; })[0];
+  if(pin){
+    html += '<div class="pin-wrap"><button class="pinbanner" data-act="goPinned">' +
+      '<span class="pb-label">' + esc(ddayLabel(pin.date)) + '</span>' +
+      '<span class="pb-main"><span class="pb-tag">대표 디데이</span>' +
+        '<span class="pb-title">' + esc(pin.title) + '</span>' +
+        '<span class="pb-date">' + esc(fmtFullDate(pin.date)) + '</span>' +
+      '</span>' +
+      '<span style="opacity:.85">' + ICON.arrow + '</span>' +
+    '</button></div>';
+  }
+
+  html += '<div class="section-label">메모방 ' + state.categories.length + '</div>';
+
+  if(!state.categories.length){
+    html += '<div class="empty"><div class="big">💬</div>' +
+      '<div class="et">아직 메모방이 없어</div>' +
+      '<div class="ed">카테고리를 만들면 카톡처럼<br>메모가 차곡차곡 쌓여</div>' +
+      '<button class="eb" data-act="addCategory">＋ 첫 카테고리 만들기</button></div>';
+  }else{
+    state.categories.forEach(function(c){
+      var msgs = state.messages.filter(function(m){ return m.catId === c.id; })
+        .sort(function(a,b){ return a.createdAt - b.createdAt; });
+      var last = msgs[msgs.length-1];
+      var open = msgs.filter(function(m){ return m.type === 'todo' && !m.done; }).length;
+      var preview;
+      if(last){
+        preview = (last.type === 'todo' ? (last.done ? '☑ ' : '☐ ') : '') + last.text.replace(/\n/g, ' ');
+      }else{
+        preview = '새 메모방이야. 눌러서 첫 메모를 남겨 봐 💜';
+      }
+      html += '<div class="crow" data-cat="' + c.id + '" data-act="openRoom">' +
+        '<div class="av" style="background:' + PALETTE[catEmojiIndex(c) % PALETTE.length] + '">' + esc(c.emoji) + '</div>' +
+        '<div class="cmain"><div class="cname">' + esc(c.name) + '</div>' +
+          '<div class="cprev">' + esc(preview) + '</div></div>' +
+        '<div class="cmeta"><div class="ctime">' + (last ? esc(fmtListTime(last.createdAt)) : '') + '</div>' +
+          (open ? '<div class="badge">' + open + '</div>' : '') + '</div>' +
+        (editMode ? '<div class="cedit">' +
+          '<button data-act="renameCat" data-id="' + c.id + '" aria-label="이름 변경">✎</button>' +
+          '<button data-act="delCat" data-id="' + c.id + '" aria-label="삭제">🗑</button></div>' : '') +
+      '</div>';
+    });
+    if(!editMode){
+      html += '<button class="addrow" data-act="addCategory">＋ 새 카테고리 추가</button>';
+    }
+  }
+  body.innerHTML = html;
+  sc.scrollTop = top;
+  document.getElementById('editBtn').textContent = editMode ? '완료' : '편집';
+  document.getElementById('editBtn').classList.toggle('on', editMode);
+}
+
+/* ══════════════ 방 ══════════════ */
+function currentCategory(){
+  return state.categories.filter(function(c){ return c.id === currentCat; })[0];
+}
+
+function openRoom(id){
+  currentCat = id;
+  editingMsg = null;
+  updateEditBar();
+  setMode('memo');
+  try{ history.pushState({v:'room'}, ''); }catch(e){}
+  showView('room');
+  renderRoom();
+  scrollBottom(true);
+  var inp = document.getElementById('input');
+  inp.value = '';
+  autoGrow(inp);
+  setTimeout(function(){ try{ inp.blur(); }catch(e){} }, 0);
+}
+
+function leaveRoom(){
+  showView('list');
+  renderList();
+  try{ if(history.state && history.state.v === 'room') history.back(); }catch(e){}
+}
+
+function messagesOf(catId){
+  return state.messages.filter(function(m){ return m.catId === catId; })
+    .sort(function(a,b){ return a.createdAt - b.createdAt; });
+}
+
+function renderRoom(keepScroll){
+  var cat = currentCategory();
+  if(!cat){
+    if(view === 'room'){ showView('list'); renderList(); }
+    return;
+  }
+  var idx = catEmojiIndex(cat);
+  document.getElementById('roomAv').textContent = cat.emoji;
+  document.getElementById('roomAv').style.background = PALETTE[idx % PALETTE.length];
+  document.getElementById('roomName').textContent = cat.name;
+
+  var msgs = messagesOf(cat.id);
+  var nMemo = msgs.filter(function(m){ return m.type === 'memo'; }).length;
+  var nOpen = msgs.filter(function(m){ return m.type === 'todo' && !m.done; }).length;
+  document.getElementById('roomSub').textContent =
+    '메모 ' + nMemo + ' · 할 일 ' + nOpen + '개 남음';
+
+  var box = document.getElementById('msgScroll');
+  var prevTop = box.scrollTop;
+  var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  var html = '';
+  var lastDay = '';
+
+  html += '<div class="sysnote">' + esc(cat.name) + ' 방이야. 아래에 적으면 메모가 말풍선으로 쌓여 💜<br>할 일은 <b>✅ 할 일</b>로 바꿔서 보내면 체크할 수 있어.</div>';
+
+  if(!msgs.length){
+    html += '<div class="empty" style="padding:24px 20px 30px"><div class="big">🫧</div>' +
+      '<div class="et">아직 비어 있어</div>' +
+      '<div class="ed">첫 메모를 남겨 봐</div></div>';
+  }
+
+  msgs.forEach(function(m){
+    var day = fmtDayDivider(m.createdAt);
+    if(day !== lastDay){
+      html += '<div class="daydiv"><span>' + esc(day) + '</span></div>';
+      lastDay = day;
+    }
+    html += '<div class="msg" data-msg="' + m.id + '">' +
+      '<div class="line">';
+    if(m.type === 'todo'){
+      html += '<div class="bbl todo ' + (m.done ? 'done' : '') + '" data-act="toggleTodo" data-id="' + m.id + '" role="checkbox" aria-checked="' + (m.done ? 'true' : 'false') + '">' +
+        '<span class="cbx">' + (m.done ? ICON.check : '') + '</span>' +
+        '<span class="btxt">' + esc(m.text) + '</span></div>';
+    }else{
+      html += '<div class="bbl" data-act="noop">' + esc(m.text) + '</div>';
+    }
+    html += '</div><div class="mmeta">' +
+      (m.editedAt ? '<span class="medited">수정됨</span>' : '') +
+      '<span class="mtime">' + fmtTime(m.createdAt) + '</span></div></div>';
+  });
+
+  box.innerHTML = html;
+  if(!keepScroll){ box.scrollTop = nearBottom ? box.scrollHeight : prevTop; }
+  else { box.scrollTop = box.scrollHeight; }
+}
+
+function scrollBottom(smooth){
+  var box = document.getElementById('msgScroll');
+  requestAnimationFrame(function(){
+    box.scrollTop = box.scrollHeight;
+  });
+}
+
+function setMode(mode){
+  composeMode = mode;
+  document.querySelectorAll('#modeSeg .seg-btn').forEach(function(b){
+    b.classList.toggle('on', b.dataset.mode === mode);
+  });
+  var inp = document.getElementById('input');
+  inp.placeholder = mode === 'todo' ? '할 일을 적어 봐 (보내면 체크리스트로!)' : '메모를 남겨 봐';
+  document.getElementById('sendBtn').innerHTML = mode === 'todo' ? ICON.checkSend : ICON.send;
+}
+
+function autoGrow(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 112) + 'px';
+}
+
+function sendMessage(){
+  var ta = document.getElementById('input');
+  var text = ta.value.trim();
+  if(!text) { ta.focus(); return; }
+  if(editingMsg){
+    var m = findMsg(editingMsg);
+    if(m){ m.text = text; m.editedAt = Date.now(); }
+    editingMsg = null;
+    updateEditBar();
+    toast('수정했어');
+  }else{
+    if(!currentCat) return;
+    state.messages.push({
+      id: uid('m_'),
+      catId: currentCat,
+      type: composeMode,
+      text: text,
+      createdAt: Date.now(),
+      done: false,
+      doneAt: 0,
+      editedAt: 0
+    });
+    vibrate(8);
+  }
+  ta.value = '';
+  autoGrow(ta);
+  save();
+  renderRoom(true);
+  renderList();
+  renderCheck();
+}
+
+function findMsg(id){
+  return state.messages.filter(function(m){ return m.id === id; })[0];
+}
+
+function updateEditBar(){
+  var bar = document.getElementById('editBar');
+  var inp = document.getElementById('input');
+  if(editingMsg){
+    var m = findMsg(editingMsg);
+    if(!m){ editingMsg = null; bar.hidden = true; return; }
+    bar.hidden = false;
+    bar.firstElementChild.textContent = '✎ ' + (m.type === 'todo' ? '할 일' : '메모') + ' 수정 중';
+    inp.value = m.text;
+    inp.focus();
+    autoGrow(inp);
+  }else{
+    bar.hidden = true;
+  }
+}
+
+/* ══════════════ 메시지 동작 ══════════════ */
+function toggleTodo(id){
+  var m = findMsg(id);
+  if(!m || m.type !== 'todo') return;
+  m.done = !m.done;
+  m.doneAt = m.done ? Date.now() : 0;
+  vibrate(m.done ? 12 : 6);
+  save();
+  renderRoom();
+  renderList();
+  renderCheck();
+  if(view === 'room' && m.done) toast('할 일 끝! 🎉');
+}
+
+function messageSheet(id){
+  var m = findMsg(id);
+  if(!m) return;
+  var cat = state.categories.filter(function(c){ return c.id === m.catId; })[0];
+  openSheet(
+    '<div class="sh-title">' + (m.type === 'todo' ? '할 일' : '메모') + '</div>' +
+    '<div class="sh-desc" style="background:#FBFAFE;border-radius:14px;padding:12px;border:1px solid #F1EBFB;white-space:pre-wrap;color:var(--ink)">' + esc(m.text) + '</div>' +
+    '<div class="menu-list">' +
+      (m.type === 'todo'
+        ? '<button class="menu-item" data-act="sheetToggle" data-id="' + m.id + '"><span class="mi">' + (m.done ? '↩️' : '✅') + '</span>' + (m.done ? '완료 취소' : '완료로 표시') + '</button>'
+        : '') +
+      '<button class="menu-item" data-act="sheetEdit" data-id="' + m.id + '"><span class="mi">✏️</span>수정</button>' +
+      '<button class="menu-item" data-act="sheetCopy" data-id="' + m.id + '"><span class="mi">📋</span>복사</button>' +
+      '<button class="menu-item danger" data-act="sheetDelete" data-id="' + m.id + '"><span class="mi">🗑</span>삭제</button>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--ink3);margin-top:8px;padding:0 4px">' + esc(cat ? cat.emoji + ' ' + cat.name : '') + ' · ' + fmtFullDate(isoFromTs(m.createdAt)) + ' ' + fmtTime(m.createdAt) + '</div>' +
+    '<div class="sheet-actions"><button class="btn ghost" data-act="closeSheet">닫기</button></div>'
+  );
+}
+function isoFromTs(ts){
+  var d = new Date(ts);
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
+function deleteMessage(id){
+  var m = findMsg(id);
+  if(!m) return;
+  var snapshot = JSON.stringify(state);
+  state.messages = state.messages.filter(function(x){ return x.id !== id; });
+  if(editingMsg === id){ editingMsg = null; updateEditBar(); }
+  save(); renderRoom(); renderList(); renderCheck();
+  closeSheet();
+  toast('삭제했어', '실행취소', function(){
+    state = normalize(JSON.parse(snapshot));
+    save(); renderRoom(); renderList(); renderCheck();
+    toast('되돌렸어');
+  }, 4200);
+}
+
+/* ══════════════ 카테고리 ══════════════ */
+function categorySheet(cat){
+  var isNew = !cat;
+  draftEmoji = cat ? cat.emoji : '💬';
+  var used = state.categories.map(function(c){ return c.emoji; });
+  var pick = cat ? cat.emoji : (EMOJIS.filter(function(e){ return used.indexOf(e) < 0; })[0] || '💬');
+  draftEmoji = pick;
+  var body = '';
+  body += '<div class="sh-title">' + (isNew ? '새 카테고리' : '카테고리 수정') + '</div>';
+  body += '<div class="sh-desc">' + (isNew ? '카톡 채팅방처럼 메모를 모아 둘 방을 만들어 💜' : '이름과 아이콘을 바꿀 수 있어') + '</div>';
+  body += '<label class="fld"><span>이름</span><input type="text" id="catName" maxlength="20" placeholder="예: 여행 준비" value="' + (cat ? esc(cat.name) : '') + '"></label>';
+  body += '<div class="fld"><span>아이콘</span><div class="emoji-grid">' +
+    EMOJIS.map(function(e){
+      return '<button class="emo ' + (e === pick ? 'on' : '') + '" data-act="pickEmoji" data-emoji="' + e + '">' + e + '</button>';
+    }).join('') + '</div></div>';
+  body += '<div class="sheet-actions">' +
+    (isNew ? '' : '<button class="btn danger" data-act="delCatConfirm" data-id="' + cat.id + '">삭제</button>') +
+    '<button class="btn primary" data-act="saveCat" data-id="' + (isNew ? '' : cat.id) + '">' + (isNew ? '만들기' : '저장') + '</button>' +
+    '</div>';
+  openSheet(body);
+  setTimeout(function(){
+    var i = document.getElementById('catName');
+    if(i && !cat) i.focus();
+  }, 280);
+}
+
+function saveCategory(id){
+  var input = document.getElementById('catName');
+  var name = (input.value || '').trim();
+  if(!name){
+    input.focus();
+    input.style.borderColor = '#E0577A';
+    toast('이름을 적어 줘');
+    return;
+  }
+  if(id){
+    var c = state.categories.filter(function(x){ return x.id === id; })[0];
+    if(c){ c.name = name.slice(0,20); c.emoji = draftEmoji; }
+  }else{
+    state.categories.push({id: uid('c_'), name: name.slice(0,20), emoji: draftEmoji});
+  }
+  save(); renderList(); renderRoom(); closeSheet();
+  toast(id ? '바꿨어' : '카테고리를 만들었어 💜');
+}
+
+function deleteCategory(id){
+  var c = state.categories.filter(function(x){ return x.id === id; })[0];
+  if(!c) return;
+  var n = state.messages.filter(function(m){ return m.catId === id; }).length;
+  var snapshot = JSON.stringify(state);
+  state.categories = state.categories.filter(function(x){ return x.id !== id; });
+  state.messages = state.messages.filter(function(m){ return m.catId !== id; });
+  if(currentCat === id){ currentCat = null; showView('list'); }
+  if(state.messages.some(function(m){ return !state.categories.some(function(c2){ return c2.id === m.catId; }); })){
+    state.messages = state.messages.filter(function(m){
+      return state.categories.some(function(c2){ return c2.id === m.catId; });
+    });
+  }
+  save(); renderList(); renderRoom(); renderCheck(); renderDday(); closeSheet();
+  toast('"' + c.name + '" 방을 지웠어' + (n ? ' (' + n + '개 메모)' : ''), '실행취소', function(){
+    state = normalize(JSON.parse(snapshot));
+    save(); renderList(); renderCheck(); renderDday();
+    toast('되돌렸어');
+  }, 4500);
+}
+
+/* ══════════════ 체크리스트 ══════════════ */
+function renderCheck(){
+  var all = state.messages.filter(function(m){ return m.type === 'todo'; })
+    .sort(function(a,b){ return a.createdAt - b.createdAt; });
+  var openTotal = all.filter(function(m){ return !m.done; }).length;
+
+  // tab badge
+  var badge = document.getElementById('tabTodoCount');
+  if(openTotal > 0){ badge.hidden = false; badge.textContent = openTotal > 99 ? '99+' : openTotal; }
+  else badge.hidden = true;
+
+  var filtered = checkFilter === 'all' ? all : all.filter(function(m){ return m.catId === checkFilter; });
+  var done = filtered.filter(function(m){ return m.done; });
+  var open = filtered.filter(function(m){ return !m.done; });
+  var pct = filtered.length ? Math.round(done.length / filtered.length * 100) : 0;
+
+  var sum = '<div class="summary">' +
+    '<div class="sm-top"><span class="sm-num">' + open.length + '</span>' +
+      '<span class="sm-txt">' + (open.length ? '개 남았어' : (filtered.length ? '다 끝냈어! 🎉' : '할 일이 없어')) + '</span>' +
+      '<span class="sm-sub">' + done.length + ' / ' + filtered.length + ' 완료</span></div>' +
+    '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+  '</div>';
+  document.getElementById('checkSummary').innerHTML = filtered.length ? sum : '';
+
+  var chips = '<button class="chip ' + (checkFilter === 'all' ? 'on' : '') + '" data-act="filterCheck" data-cat="all">전체 <span class="cnt">' + all.length + '</span></button>';
+  state.categories.forEach(function(c){
+    var n = all.filter(function(m){ return m.catId === c.id; }).length;
+    chips += '<button class="chip ' + (checkFilter === c.id ? 'on' : '') + '" data-act="filterCheck" data-cat="' + c.id + '">' + esc(c.emoji) + ' ' + esc(c.name) + ' <span class="cnt">' + n + '</span></button>';
+  });
+  document.getElementById('checkChips').innerHTML = chips;
+
+  var body = '';
+  if(!filtered.length){
+    body = '<div class="empty"><div class="big">✅</div><div class="et">할 일이 아직 없어</div>' +
+      '<div class="ed">아래 <b>할 일 추가</b>로 만들거나,<br>채팅방에서 ✅ 할 일로 보내도 여기 모여</div></div>';
+  }else{
+    if(open.length){
+      body += '<div class="glabel">미완료 ' + open.length + '</div>';
+      open.forEach(function(m){ body += todoRowHTML(m); });
+    }
+    if(done.length){
+      body += '<div class="glabel">완료 ' + done.length + '</div>';
+      done.forEach(function(m){ body += todoRowHTML(m); });
+    }
+  }
+  document.getElementById('checkBody').innerHTML = body;
+}
+
+function todoRowHTML(m){
+  var c = state.categories.filter(function(x){ return x.id === m.catId; })[0];
+  return '<div class="trow ' + (m.done ? 'done' : '') + '" data-msg="' + m.id + '">' +
+    '<button class="check" data-act="toggleTodo" data-id="' + m.id + '" aria-label="체크">' + (m.done ? ICON.check : '') + '</button>' +
+    '<div class="tmain" data-act="toggleTodo" data-id="' + m.id + '">' +
+      '<div class="ttxt">' + esc(m.text) + '</div>' +
+      '<div class="tmeta"><span class="tag">' + esc((c ? c.emoji + ' ' + c.name : '메모')) + '</span><span>' + esc(fmtListTime(m.createdAt)) + '</span></div>' +
+    '</div>' +
+    '<button class="tdel" data-act="delMsg" data-id="' + m.id + '" aria-label="삭제">✕</button>' +
+  '</div>';
+}
+
+function todoSheet(msg){
+  if(!state.categories.length){ toast('먼저 메모방을 하나 만들어 줘 💜'); categorySheet(null); return; }
+  var isNew = !msg;
+  draftCat = msg ? msg.catId : (checkFilter !== 'all' ? checkFilter : state.categories[0].id);
+  var body = '<div class="sh-title">' + (isNew ? '할 일 추가' : '할 일 수정') + '</div>';
+  body += '<div class="sh-desc">' + (isNew ? '어느 방에 쌓을지 고르면 그 방 채팅에도 남아' : '') + '&nbsp;</div>';
+  body += '<label class="fld"><span>내용</span><textarea id="todoText" placeholder="예: 무대인사 예매 알람 켜기">' + (msg ? esc(msg.text) : '') + '</textarea></label>';
+  body += '<div class="fld"><span>방</span><div class="chipsel">' +
+    state.categories.map(function(c){
+      return '<button class="cs ' + (c.id === draftCat ? 'on' : '') + '" data-act="pickCat" data-id="' + c.id + '">' + esc(c.emoji) + ' ' + esc(c.name) + '</button>';
+    }).join('') + '</div></div>';
+  body += '<div class="sheet-actions">' +
+    (isNew ? '' : '<button class="btn danger" data-act="delMsg" data-id="' + msg.id + '">삭제</button>') +
+    '<button class="btn primary" data-act="saveTodo" data-id="' + (isNew ? '' : msg.id) + '">' + (isNew ? '추가하기' : '저장') + '</button></div>';
+  openSheet(body);
+  if(isNew) setTimeout(function(){ try{ document.getElementById('todoText').focus(); }catch(e){} }, 280);
+}
+
+function saveTodo(id){
+  var ta = document.getElementById('todoText');
+  var text = (ta.value || '').trim();
+  if(!text){ ta.focus(); toast('내용을 적어 줘'); return; }
+  if(id){
+    var m = findMsg(id);
+    if(m){ m.text = text; m.catId = draftCat; m.editedAt = Date.now(); }
+    toast('수정했어');
+  }else{
+    state.messages.push({
+      id: uid('m_'), catId: draftCat, type: 'todo', text: text,
+      createdAt: Date.now(), done: false, doneAt: 0, editedAt: 0
+    });
+    toast('할 일을 추가했어 ✅');
+    vibrate(8);
+  }
+  save(); renderCheck(); renderList(); renderRoom();
+  closeSheet();
+}
+
+/* ══════════════ 디데이 ══════════════ */
+function renderDday(){
+  var body = document.getElementById('ddayBody');
+  var list = state.ddays.slice();
+  var up = list.filter(function(d){ return dayDiff(d.date) >= 0; })
+    .sort(function(a,b){ return dayDiff(a.date) - dayDiff(b.date); });
+  var past = list.filter(function(d){ return dayDiff(d.date) < 0; })
+    .sort(function(a,b){ return dayDiff(b.date) - dayDiff(a.date); });
+  var sorted = up.concat(past);
+
+  var html = '';
+  if(!sorted.length){
+    html = '<div class="empty dday-empty"><div class="big">📅</div>' +
+      '<div class="et">디데이가 없어</div>' +
+      '<div class="ed">시험, 여행, 예매일처럼<br>세고 싶은 날을 적어 두면 D-7 · D-Day로 보여 줘</div>' +
+      '<button class="eb" data-act="addDday">＋ 디데이 추가</button></div>';
+  }else{
+    sorted.forEach(function(d, i){
+      var diff = dayDiff(d.date);
+      var pinned = state.pinId === d.id;
+      var label = ddayLabel(d.date);
+      html += '<div class="dcard ' + (diff < 0 ? 'past' : '') + ' ' + (pinned ? 'pinned' : '') + '" data-act="editDday" data-id="' + d.id + '" style="--accent:' + PALETTE[i % PALETTE.length] + '">' +
+        (pinned ? '' : '') +
+        '<div class="dnum">' + esc(label) + '<small>' + esc(ddaySub(d.date)) + '</small></div>' +
+        '<div class="dinfo">' + (pinned ? '<span class="pin-tag">대표 디데이</span>' : '') + '<div class="dtitle">' + esc(d.title) + '</div>' +
+          '<div class="ddate">' + esc(fmtFullDate(d.date)) + '</div></div>' +
+        '<button class="dpin ' + (pinned ? 'on' : '') + '" data-act="pinDday" data-id="' + d.id + '" aria-label="대표 디데이">' + (pinned ? ICON.starOn : ICON.star) + '</button>' +
+      '</div>';
+    });
+  }
+  body.innerHTML = html;
+}
+
+function ddaySheet(d){
+  var isNew = !d;
+  var date = d ? d.date : isoDate(7);
+  pendingPin = d ? state.pinId === d.id : false;
+  var body = '<div class="sh-title">' + (isNew ? '디데이 추가' : '디데이 수정') + '</div>';
+  body += '<div class="sh-desc">날짜를 넣으면 D-7 / D-Day / D+3로 자동 계산해 💜</div>';
+  body += '<label class="fld"><span>제목</span><input type="text" id="ddayTitle" maxlength="40" placeholder="예: 서울식물원 야간개장" value="' + (d ? esc(d.title) : '') + '"></label>';
+  body += '<label class="fld"><span>날짜</span><input type="date" id="ddayDate" value="' + date + '"></label>';
+  body += '<button class="switch-row" data-act="togglePin" style="width:100%;text-align:left">' +
+    '<span class="st">대표 디데이로 고정<small>채팅 목록 맨 위에 배너로 보여</small></span>' +
+    '<span class="switch ' + (pendingPin ? 'on' : '') + '" id="pinSwitch"></span></button>';
+  body += '<div class="sheet-actions">' +
+    (isNew ? '' : '<button class="btn danger" data-act="delDday" data-id="' + d.id + '">삭제</button>') +
+    '<button class="btn primary" data-act="saveDday" data-id="' + (isNew ? '' : d.id) + '">' + (isNew ? '추가하기' : '저장') + '</button></div>';
+  openSheet(body);
+}
+
+function saveDday(id){
+  var title = (document.getElementById('ddayTitle').value || '').trim();
+  var date = document.getElementById('ddayDate').value;
+  if(!title){ document.getElementById('ddayTitle').focus(); toast('제목을 적어 줘'); return; }
+  if(!date){ toast('날짜를 골라 줘'); return; }
+  if(id){
+    var d = state.ddays.filter(function(x){ return x.id === id; })[0];
+    if(d){ d.title = title.slice(0,40); d.date = date; }
+    if(pendingPin) state.pinId = id;
+    else if(state.pinId === id) state.pinId = null;
+  }else{
+    var nd = {id: uid('d_'), title: title.slice(0,40), date: date, createdAt: Date.now()};
+    state.ddays.push(nd);
+    if(pendingPin) state.pinId = nd.id;
+  }
+  save(); renderDday(); renderList(); closeSheet();
+  toast(id ? '바꿨어' : '디데이를 추가했어 📅');
+}
+
+function deleteDday(id){
+  var d = state.ddays.filter(function(x){ return x.id === id; })[0];
+  if(!d) return;
+  var snapshot = JSON.stringify(state);
+  state.ddays = state.ddays.filter(function(x){ return x.id !== id; });
+  if(state.pinId === id) state.pinId = null;
+  save(); renderDday(); renderList(); closeSheet();
+  toast('디데이를 지웠어', '실행취소', function(){
+    state = normalize(JSON.parse(snapshot));
+    save(); renderDday(); renderList();
+    toast('되돌렸어');
+  }, 4200);
+}
+
+/* ══════════════ 설정 / 백업 ══════════════ */
+function settingsSheet(){
+  var nMemo = state.messages.filter(function(m){ return m.type === 'memo'; }).length;
+  var nTodo = state.messages.filter(function(m){ return m.type === 'todo'; }).length;
+  openSheet(
+    '<div class="sh-title">메모 💜</div>' +
+    '<div class="sh-desc">방 ' + state.categories.length + ' · 메모 ' + nMemo + ' · 할 일 ' + nTodo + ' · 디데이 ' + state.ddays.length + '<br>모든 내용은 이 기기 브라우저에만 저장돼.</div>' +
+    '<div class="menu-list">' +
+      '<button class="menu-item" data-act="exportData"><span class="mi">⬇️</span><div>백업 파일로 내보내기<small>JSON 파일로 저장해 둘게</small></div></button>' +
+      '<button class="menu-item" data-act="importData"><span class="mi">⬆️</span><div>백업 파일 불러오기<small>지금 내용은 백업 내용으로 바뀌어</small></div></button>' +
+      '<button class="menu-item" data-act="openGuide"><span class="mi">💡</span><div>사용 방법</div></button>' +
+      '<button class="menu-item danger" data-act="resetData"><span class="mi">🧹</span><div>모든 데이터 지우기</div></button>' +
+    '</div>' +
+    '<div class="sheet-actions"><button class="btn ghost" data-act="closeSheet">닫기</button></div>'
+  );
+}
+
+function exportData(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '메모백업_' + isoDate(0) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+  closeSheet();
+  toast('백업 파일을 내려받았어 ⬇️', null, null, 3200);
+}
+
+function importData(){
+  document.getElementById('importFile').click();
+}
+
+function handleImport(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(String(reader.result));
+      if(!data || !Array.isArray(data.categories) || !Array.isArray(data.messages)){
+        throw new Error('형식이 달라');
+      }
+      confirmSheet('백업을 불러올까?', '지금 있는 메모·할 일·디데이가 백업 파일 내용으로 바뀌어.', '불러오기', function(){
+        state = normalize(data);
+        currentCat = null; editingMsg = null; checkFilter = 'all';
+        save(); renderList(); renderCheck(); renderDday(); updateEditBar();
+        showView('list');
+        closeSheet();
+        toast('백업을 불러왔어 💜');
+      });
+    }catch(e){
+      toast('백업 파일을 읽지 못했어 😢');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetData(){
+  confirmSheet('모든 데이터를 지울까?', '메모·할 일·디데이가 모두 사라져. 되돌릴 수 없으니 먼저 백업을 받아 두는 게 좋아.', '모두 지우기', function(){
+    state = defaults();
+    currentCat = null; editingMsg = null; checkFilter = 'all'; editMode = false;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    save(); renderList(); renderCheck(); renderDday(); updateEditBar();
+    showView('list');
+    closeSheet();
+    toast('처음 상태로 돌아갔어');
+  }, true);
+}
+
+function guideSheet(){
+  openSheet(
+    '<div class="sh-title">이렇게 써 봐 💜</div>' +
+    '<div class="sh-desc">카톡처럼 생긴 나만의 메모장이야.</div>' +
+    '<div style="font-size:13.5px;line-height:1.75;color:var(--ink2)">' +
+      '<p style="margin-bottom:10px"><b style="color:var(--ink)">1. 방 만들기</b><br>채팅 탭 오른쪽 위 <b>＋</b>로 카테고리를 추가해. 이름과 아이콘은 언제든 바꿀 수 있어.</p>' +
+      '<p style="margin-bottom:10px"><b style="color:var(--ink)">2. 메모 남기기</b><br>방에 들어가 아래 입력창에 쓰고 보내면 시간이랑 같이 말풍선으로 쌓여. 말풍선을 <b>길게 누르면</b> 수정·삭제할 수 있어.</p>' +
+      '<p style="margin-bottom:10px"><b style="color:var(--ink)">3. 할 일 체크</b><br>입력창 위 <b>✅ 할 일</b>로 바꿔 보내면 체크박스 말풍선이 돼. 톡 누르면 취소선 그어지며 완료!</p>' +
+      '<p style="margin-bottom:10px"><b style="color:var(--ink)">4. 한눈에 보기</b><br>체크리스트 탭에서 모든 방의 할 일을 모아 보고, 디데이 탭에서 중요한 날을 D-7 / D-Day로 세.</p>' +
+      '<p><b style="color:var(--ink)">5. 홈 화면에 추가</b><br>삼성 인터넷 메뉴 → <b>홈 화면에 추가</b>를 누르면 앱처럼 열려.</p>' +
+    '</div>' +
+    '<div style="margin-top:14px;font-size:11.5px;color:var(--ink3)">기록은 이 브라우저에만 저장돼. 브라우저 기록을 지우면 함께 사라지니 가끔 백업해 둬.</div>' +
+    '<div class="sheet-actions"><button class="btn primary" data-act="closeSheet">알겠어</button></div>'
+  );
+}
+
+/* ══════════════ 이벤트 ══════════════ */
+document.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if(!el) return;
+  var act = el.dataset.act;
+  var id = el.dataset.id;
+
+  switch(act){
+    case 'noop':
+      return;
+    case 'tab': goTab(el.dataset.tab); return;
+    case 'openRoom': openRoom(el.closest('.crow').dataset.cat); return;
+    case 'back': leaveRoom(); return;
+    case 'toggleEdit':
+      editMode = !editMode; renderList(); return;
+    case 'addCategory': categorySheet(null); return;
+    case 'renameCat': e.stopPropagation(); categorySheet(state.categories.filter(function(c){ return c.id === id; })[0]); return;
+    case 'delCat': e.stopPropagation(); askDeleteCat(id); return;
+    case 'delCatConfirm': askDeleteCat(id); return;
+    case 'saveCat': saveCategory(id); return;
+    case 'pickEmoji':
+      draftEmoji = el.dataset.emoji;
+      el.parentNode.querySelectorAll('.emo').forEach(function(b){ b.classList.remove('on'); });
+      el.classList.add('on');
+      return;
+    case 'mode': setMode(el.dataset.mode); return;
+    case 'send': sendMessage(); return;
+    case 'cancelEdit':
+      editingMsg = null; document.getElementById('input').value = ''; autoGrow(document.getElementById('input')); updateEditBar(); return;
+    case 'toggleTodo': toggleTodo(id); return;
+    case 'delMsg': deleteMessage(id); return;
+    case 'sheetEdit': {
+      var m = findMsg(id); if(!m) return;
+      editingMsg = id;
+      if(m.type === 'todo') setMode('todo');
+      var cat = m.catId;
+      closeSheet();
+      if(cat !== currentCat){ currentCat = cat; }
+      showView('room'); renderRoom(true);
+      updateEditBar();
+      return;
+    }
+    case 'sheetToggle': toggleTodo(id); closeSheet(); return;
+    case 'sheetCopy': {
+      var mm = findMsg(id);
+      if(mm){
+        try{
+          if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(mm.text);
+        }catch(err){}
+        toast('복사했어 📋');
+      }
+      closeSheet();
+      return;
+    }
+    case 'sheetDelete': deleteMessage(id); return;
+    case 'filterCheck': checkFilter = el.dataset.cat; renderCheck(); return;
+    case 'addTodo':
+      if(!state.categories.length){ toast('먼저 메모방을 하나 만들어 줘 💜'); categorySheet(null); return; }
+      todoSheet(null); return;
+    case 'saveTodo': saveTodo(id); return;
+    case 'pickCat': {
+      draftCat = el.dataset.id;
+      el.parentNode.querySelectorAll('.cs').forEach(function(b){ b.classList.remove('on'); });
+      el.classList.add('on'); return;
+    }
+    case 'addDday': ddaySheet(null); return;
+    case 'editDday':
+      if(e.target.closest('[data-act="pinDday"]')) return;
+      ddaySheet(state.ddays.filter(function(d){ return d.id === el.dataset.id; })[0]);
+      return;
+    case 'pinDday': {
+      e.stopPropagation();
+      state.pinId = state.pinId === id ? null : id;
+      save(); renderDday(); renderList();
+      toast(state.pinId ? '채팅 목록 위에 고정했어 📌' : '고정을 풀었어');
+      return;
+    }
+    case 'togglePin': {
+      pendingPin = !pendingPin;
+      var sw = document.getElementById('pinSwitch');
+      if(sw) sw.classList.toggle('on', pendingPin);
+      return;
+    }
+    case 'saveDday': saveDday(id); return;
+    case 'delDday': deleteDday(id); return;
+    case 'goPinned': goTab('dday'); showView('dday'); renderDday(); return;
+    case 'openSettings': settingsSheet(); return;
+    case 'openGuide': guideSheet(); return;
+    case 'exportData': exportData(); return;
+    case 'importData': closeSheet(); setTimeout(importData, 120); return;
+    case 'resetData': resetData(); return;
+    case 'closeSheet': closeSheet(); return;
+    case 'confirmOk': {
+      var fn = sheet._onOk; sheet._onOk = null;
+      closeSheet(); if(fn) setTimeout(fn, 60); return;
+    }
+    case 'toastAction': {
+      var f = toastEl._action; toastEl._action = null;
+      toastEl.classList.remove('on');
+      if(f) f();
+      return;
+    }
+    case 'roomMenu': roomMenu(); return;
+  }
+});
+
+function askDeleteCat(id){
+  var c = state.categories.filter(function(x){ return x.id === id; })[0];
+  if(!c) return;
+  var n = state.messages.filter(function(m){ return m.catId === id; }).length;
+  confirmSheet('"' + c.name + '" 방을 지울까?', n ? '이 방의 메모 ' + n + '개도 함께 사라져. (지운 뒤 실행취소 할 수 있어)' : '아직 메모가 없는 방이야.', '지우기', function(){ deleteCategory(id); }, true);
+}
+
+function roomMenu(){
+  var c = currentCategory(); if(!c) return;
+  openSheet(
+    '<div class="sh-title">' + esc(c.emoji + ' ' + c.name) + '</div>' +
+    '<div class="sh-desc">이 방에서 할 수 있는 것</div>' +
+    '<div class="menu-list">' +
+      '<button class="menu-item" data-act="renameCat" data-id="' + c.id + '"><span class="mi">✏️</span><div>이름 · 아이콘 바꾸기</div></button>' +
+      '<button class="menu-item" data-act="roomCopyAll" data-id="' + c.id + '"><span class="mi">📋</span><div>이 방 메모 전부 복사<small>텍스트로 한 번에 옮길 수 있어</small></div></button>' +
+      '<button class="menu-item danger" data-act="delCatConfirm" data-id="' + c.id + '"><span class="mi">🗑</span><div>이 방 삭제</div></button>' +
+    '</div>' +
+    '<div class="sheet-actions"><button class="btn ghost" data-act="closeSheet">닫기</button></div>'
+  );
+}
+
+document.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-act="roomCopyAll"]') : null;
+  if(!el) return;
+  var msgs = messagesOf(el.dataset.id);
+  var text = msgs.map(function(m){
+    return '[' + fmtListTime(m.createdAt) + '] ' + (m.type === 'todo' ? (m.done ? '☑ ' : '☐ ') : '') + m.text;
+  }).join('\n');
+  try{ if(navigator.clipboard) navigator.clipboard.writeText(text); }catch(err){}
+  closeSheet(); toast(msgs.length ? '방 메모를 복사했어 📋' : '복사할 메모가 없어');
+});
+
+/* 입력 */
+var inputEl = document.getElementById('input');
+inputEl.addEventListener('input', function(){ autoGrow(this); });
+inputEl.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+/* 길게 누르기 */
+(function(){
+  var scroll = document.getElementById('msgScroll');
+  var timer = null, fired = false, startX = 0, startY = 0, target = null;
+
+  function clear(){ if(timer){ clearTimeout(timer); timer = null; } }
+
+  scroll.addEventListener('pointerdown', function(e){
+    var b = e.target.closest ? e.target.closest('.bbl') : null;
+    if(!b) return;
+    target = b; fired = false; startX = e.clientX; startY = e.clientY;
+    clear();
+    timer = setTimeout(function(){
+      fired = true;
+      var msgEl = b.closest('.msg');
+      if(msgEl){
+        messageSheet(msgEl.dataset.msg);
+        vibrate(15);
+      }
+    }, 520);
+  });
+  scroll.addEventListener('pointermove', function(e){
+    if(!timer) return;
+    if(Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) clear();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+    scroll.addEventListener(ev, clear);
+  });
+  scroll.addEventListener('click', function(e){
+    if(fired){
+      fired = false;
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }, true);
+  scroll.addEventListener('contextmenu', function(e){
+    var b = e.target.closest ? e.target.closest('.bbl') : null;
+    if(b){ e.preventDefault(); }
+  });
+})();
+
+/* 체크리스트 행 길게 누르기 */
+(function(){
+  var body = document.getElementById('checkBody');
+  var timer = null, fired = false, sx = 0, sy = 0;
+  function clear(){ if(timer){ clearTimeout(timer); timer = null; } }
+  body.addEventListener('pointerdown', function(e){
+    var row = e.target.closest ? e.target.closest('.trow') : null;
+    if(!row) return;
+    sx = e.clientX; sy = e.clientY; fired = false;
+    clear();
+    timer = setTimeout(function(){
+      fired = true;
+      var m = findMsg(row.dataset.msg);
+      if(m) { todoSheet(m); vibrate(15); }
+    }, 520);
+  });
+  body.addEventListener('pointermove', function(e){
+    if(!timer) return;
+    if(Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) clear();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(ev){ body.addEventListener(ev, clear); });
+  body.addEventListener('click', function(e){ if(fired){ fired = false; e.stopPropagation(); e.preventDefault(); } }, true);
+})();
+
+/* backdrop / esc */
+backdrop.addEventListener('click', closeSheet);
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    if(sheet.classList.contains('on')) closeSheet();
+    else if(view === 'room'){ leaveRoom(); }
+  }
+});
+
+/* 메시지 영역에서 삭제 등 시트 열림 후 복귀 */
+document.getElementById('importFile').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(f) handleImport(f);
+});
+
+/* 브라우저 뒤로가기 → 방에서 목록으로 */
+window.addEventListener('popstate', function(){
+  if(view === 'room'){ showView('list'); renderList(); }
+});
+function pushGuard(){
+  try{ history.replaceState({v:'list'}, ''); }catch(e){}
+}
+
+/* ══════════════ 시작 ══════════════ */
+function boot(){
+  renderList();
+  renderCheck();
+  renderDday();
+  setMode('memo');
+  showView('list');
+  save();
+  pushGuard();
+
+  // 첫 실행 안내
+  try{
+    if(!localStorage.getItem(KEY + '.seen')){
+      localStorage.setItem(KEY + '.seen', '1');
+      setTimeout(function(){
+        toast('카테고리를 눌러 첫 메모를 남겨 봐 💜', null, null, 3200);
+      }, 600);
+    }
+  }catch(e){}
+
+  // 날짜가 바뀌면 D-day 라벨 갱신
+  setInterval(function(){
+    renderList();
+    if(view === 'dday') renderDday();
+  }, 60000);
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+})();
+</script>
+</body>
+</html>

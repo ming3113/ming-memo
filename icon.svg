@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="메모">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C6AEF7"/>
+      <stop offset="1" stop-color="#7E57C2"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F3ECFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="398" cy="112" r="92" fill="#FFFFFF" opacity=".10"/>
+  <circle cx="96" cy="424" r="116" fill="#FFFFFF" opacity=".08"/>
+  <path d="M172 136h168a52 52 0 0 1 52 52v110a52 52 0 0 1-52 52H266l-54 62v-62h-40a52 52 0 0 1-52-52V188a52 52 0 0 1 52-52Z" fill="url(#paper)"/>
+  <rect x="164" y="186" width="118" height="20" rx="10" fill="#C4ABF2"/>
+  <rect x="164" y="228" width="184" height="20" rx="10" fill="#DECDF9"/>
+  <rect x="164" y="270" width="130" height="20" rx="10" fill="#DECDF9"/>
+  <path d="M352 325c-8-6-22-14-22-28 0-9 7-15 14-15 4 0 7 2 8 6 1-4 4-6 8-6 7 0 14 6 14 15 0 14-14 22-22 28Z" fill="#9B7BD6"/>
+</svg>
